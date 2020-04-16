@@ -1,0 +1,48 @@
+{/* //navigation items configure for user  */}
+    {state.isAuthenticated && state.user.role === 'user' ?
+    (
+
+    ):(
+
+    )
+  }
+  {/* end of navigation for user */}
+
+  {/* //navigation items configure for seller  */}
+  {state.isAuthenticated && state.user.role === 'seller' ?
+    (
+      <div>
+         <Link to="/notification" className={classes.anchor}>
+              <IconButton color="primary">
+                <FaBell />
+              </IconButton>
+            </Link>
+      <Link to="/seller-dashboard" className={classes.anchor}>
+      <IconButton color="primary">
+        <IoIosPerson />
+      </IconButton>
+    </Link>
+      <Link className={classes.anchor} onClick={handleLogout}>
+      <IconButton color="primary">
+        <IoIosLogOut />
+      </IconButton>
+    </Link>
+    </div>
+    ):(
+      <div>
+      <div className={classes.sectionDesktop}>
+        <Link to="/register" className={classes.anchor}>
+          <Button color="primary" className="font">
+            Register
+          </Button>
+        </Link>
+      </div>
+      <Link to="/login" className={classes.anchor}>
+        <IconButton color="primary">
+          <IoIosLogIn />
+        </IconButton>
+      </Link>
+      </div>
+    )
+  }
+  {/* end of navigation for seller */}
