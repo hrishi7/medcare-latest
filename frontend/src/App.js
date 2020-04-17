@@ -7,25 +7,25 @@ import MainRoute from "./components//common/MainRoute";
 
 import Header from "./components/common/Header";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   grow: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   logo: {
     maxwidth: "160px",
-    maxHeight: "50px"
+    maxHeight: "50px",
   },
   content: {
     flex: 1,
     backgroundColor: theme.palette.background.default,
     padding: 0,
-    minHeight: "555px"
+    minHeight: "555px",
   },
   sectionDesktop: {
     display: "none",
     [theme.breakpoints.up("md")]: {
-      display: "flex"
-    }
+      display: "flex",
+    },
   },
   toolbar: theme.mixins.toolbar,
   search: {
@@ -33,15 +33,15 @@ const useStyles = makeStyles(theme => ({
     borderRadius: theme.shape.borderRadius,
     backgroundColor: fade("#005aff", 0.15),
     "&:hover": {
-      backgroundColor: fade("#005aff", 0.25)
+      backgroundColor: fade("#005aff", 0.25),
     },
     marginRight: theme.spacing(2),
     marginLeft: 0,
     width: "100%",
     [theme.breakpoints.up("sm")]: {
       marginLeft: theme.spacing(3),
-      width: "auto"
-    }
+      width: "auto",
+    },
   },
   searchIcon: {
     width: theme.spacing(7),
@@ -50,25 +50,25 @@ const useStyles = makeStyles(theme => ({
     pointerEvents: "none",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   inputRoot: {
-    color: "inherit"
+    color: "inherit",
   },
   inputInput: {
     padding: theme.spacing(1, 1, 1, 7),
     transition: theme.transitions.create("width"),
     width: "100%",
     [theme.breakpoints.up("md")]: {
-      width: 200
-    }
+      width: 200,
+    },
   },
   margin: {
-    paddingTop: theme.spacing(2)
+    paddingTop: theme.spacing(2),
   },
   anchor: {
-    textDecoration: "none"
-  }
+    textDecoration: "none",
+  },
 }));
 
 function App(props) {

@@ -14,6 +14,7 @@ import Container from "@material-ui/core/Container";
 import setAuthToken from "../../utils/setAuthToken";
 import axios from "axios";
 import { proxy } from "../../proxy";
+import { GOOGLE_API_KEY } from "../../config/config";
 
 const useStyles = makeStyles((theme) => ({
   "@global": {
@@ -92,30 +93,37 @@ const UpdateProductStock = (props) => {
      * find longitude and setstate
      * create object and call api to update stock
      */
-    let { lat, lng } = getCoordinate();
-    let storeLoc = await getFormattedAddress(lat, lng);
-    setStoreLocation(storeLoc);
+    getCoordinate();
   };
+
+  var option = {
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0,
+  };
+
+  async function success(pos) {
+    var crd = pos.coords;
+    let storeLoc = await getFormattedAddress(crd.latitude, crd.longitude);
+    setStoreLocation(storeLoc);
+  }
+
+  function error(err) {
+    console.warn(`ERROR(${err.code}): ${err.message}`);
+  }
 
   const getCoordinate = () => {
     if (navigator.geolocation) {
-      return navigator.geolocation.getCurrentPosition(showPosition);
+      return navigator.geolocation.getCurrentPosition(success, error, option);
     } else {
       alert("Detect Location feature Not supported");
     }
-    function showPosition(position) {
-      let lat = position.coords.latitude;
-      let lng = position.coords.longitude;
-      return {
-        lat,
-        lng,
-      };
-    }
   };
+
   const getLatitudeLongitude = async () => {
     setAuthToken(null);
     let response = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyDC8t4IirVUSy8VzXgNYHUBQZboaOKGFCo&address=${storeLocation}`
+      `https://maps.googleapis.com/maps/api/geocode/json?key=${GOOGLE_API_KEY}&address=${storeLocation}`
     );
     if (response.status === 200) {
       return response.data.results[0].geometry.location;
@@ -127,7 +135,7 @@ const UpdateProductStock = (props) => {
   const getFormattedAddress = async (lat, lng) => {
     setAuthToken(null);
     let response = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyDC8t4IirVUSy8VzXgNYHUBQZboaOKGFCo`
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
     );
     if (response.status == 200) {
       return response.data.results[0].formatted_address;
