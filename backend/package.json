@@ -4,7 +4,6 @@
   "description": "this is the backend api service for medcare site",
   "main": "server.js",
   "scripts": {
-    "start": "SET NODE_ENV=production & node server",
     "dev": "nodemon server.js"
   },
   "author": "Hrishikesh Baidya",

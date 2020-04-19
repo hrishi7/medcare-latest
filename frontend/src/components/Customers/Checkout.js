@@ -72,34 +72,33 @@ const Checkout = (props) => {
     }
   };
 
-  const handleOrder = () => {
-    if (itemPrice + deliveryFee <= 0) {
-      return alert("Please Add product to cart to order");
-    }
-    if (auth.isAuthenticated && auth.user.role === "user") {
-      console.log(auth);
-      let user = auth.user;
-      let paymentData = {
-        items: medicines.cartItems,
-        deliveryLocation: deliverylocation,
-        purpose: "Purchase Medicine",
-        amount: itemPrice + deliveryFee,
-        buyer_name: user.name,
-        email: user.email,
-        // phone: user.mobile,
-        redirect_url: `http://localhost:5000/api/v1/payment/callback?user_id=${user.id}&user_email=${user.email}`,
-        webhook_url: "/webhook/",
-      };
-      axios
-        .post("http://localhost:5000/api/v1/payment/pay", paymentData)
-        .then((res) => {
-          window.location.href = res.data;
-        })
-        .catch((err) => console.log(err));
-    } else {
-      props.history.push("/login");
-    }
-  };
+  // const handleOrder = () => {
+  //   if (itemPrice + deliveryFee <= 0) {
+  //     return alert("Please Add product to cart to order");
+  //   }
+  //   if (auth.isAuthenticated && auth.user.role === "user") {
+  //     let user = auth.user;
+  //     let paymentData = {
+  //       items: medicines.cartItems,
+  //       deliveryLocation: deliverylocation,
+  //       purpose: "Purchase Medicine",
+  //       amount: itemPrice + deliveryFee,
+  //       buyer_name: user.name,
+  //       email: user.email,
+  //       // phone: user.mobile,
+  //       redirect_url: `http://localhost:5000/api/v1/payment/callback?user_id=${user.id}&user_email=${user.email}`,
+  //       webhook_url: "/webhook/",
+  //     };
+  //     axios
+  //       .post("http://localhost:5000/api/v1/payment/pay", paymentData)
+  //       .then((res) => {
+  //         window.location.href = res.data;
+  //       })
+  //       .catch((err) => console.log(err));
+  //   } else {
+  //     props.history.push("/login");
+  //   }
+  // };
 
   return (
     <Fragment>
@@ -107,7 +106,13 @@ const Checkout = (props) => {
       <Container>
         <Grid container spacing={2}>
           <Grid item xs={12} md={9}>
-            <CheckoutSteps />
+            <CheckoutSteps
+              data={medicines.cartItems}
+              seller={"A1 Pharmeticals"}
+              itemPrice={itemPrice}
+              auth={auth}
+              deliveryFee={deliveryFee}
+            />
           </Grid>
           <Grid item xs={12} md={3}>
             <Paper className={classes.cart}>
@@ -148,12 +153,6 @@ const Checkout = (props) => {
                   </Typography>
                 </Grid>
               </Grid>
-              <br />
-              <center>
-                {/* <Link style={{ textDecoration: "none" }} to='/' onClick={handleOrder}> */}
-                <Chip label="Pay Now" color="primary" onClick={handleOrder} />
-                {/* </Link> */}
-              </center>
             </Paper>
           </Grid>
         </Grid>

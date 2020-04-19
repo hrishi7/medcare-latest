@@ -124,13 +124,13 @@ const Header = (props) => {
       <HideOnScroll>
         <AppBar color="default">
           <Toolbar>
-            <Link to="/">
-              <img
-                src="https://res.cloudinary.com/hrishi7/image/upload/v1586783076/medcareLogo.png"
-                alt="Medicare"
-                className={classes.logo}
-              />
-            </Link>
+            <img
+              src="https://res.cloudinary.com/hrishi7/image/upload/v1586783076/medcareLogo.png"
+              alt="Medicare"
+              className={classes.logo}
+              onClick={() => (window.location.href = "/")}
+            />
+
             <div className={classes.grow} />
             <div className={classes.search}>
               <SearchBar />

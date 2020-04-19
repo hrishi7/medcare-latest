@@ -8,7 +8,7 @@ import {
   Grid,
   Chip,
   Divider,
-  Typography
+  Typography,
 } from "@material-ui/core/";
 import { FaMapMarkerAlt, FaTrashAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -17,21 +17,21 @@ import { removeFromCartAction } from "../../redux/redux";
 import jwt_decode from "jwt-decode";
 import axios from "axios";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   cart: {
-    padding: "10px"
+    padding: "10px",
   },
   itemImg: {
     width: "135px",
     height: "126px",
-    borderRadius: 10
-  }
+    borderRadius: 10,
+  },
 }));
 
-const Cart = props => {
+const Cart = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  let state = useSelector(state => state);
+  let state = useSelector((state) => state);
   let medicines = state.medicines;
   let auth = state.auth;
 
@@ -42,9 +42,7 @@ const Cart = props => {
   const [itemPrice, setItemPrice] = useState(0);
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [total, setTotal] = useState(0);
-  const [deliverylocation, setDeliveryLocation] = useState(
-    "45, Tollygunge, Kolkata-40"
-  );
+  const [deliverylocation, setDeliveryLocation] = useState("");
 
   const totalSum = async () => {
     let price = 0;
@@ -70,35 +68,6 @@ const Cart = props => {
     }
   };
 
-  const handleOrder = () => {
-    if (itemPrice + deliveryFee <= 0) {
-      return alert("Please Add product to cart to order");
-    }
-    if (auth.isAuthenticated && auth.user.role === "user") {
-      console.log(auth);
-      let user = auth.user;
-      let paymentData = {
-        items: medicines.cartItems,
-        deliveryLocation: deliverylocation,
-        purpose: "Purchase Medicine",
-        amount: itemPrice + deliveryFee,
-        buyer_name: user.name,
-        email: user.email,
-        // phone: user.mobile,
-        redirect_url: `http://localhost:5000/api/v1/payment/callback?user_id=${user.id}&user_email=${user.email}`,
-        webhook_url: "/webhook/"
-      };
-      axios
-        .post("http://localhost:5000/api/v1/payment/pay", paymentData)
-        .then(res => {
-          window.location.href = res.data;
-        })
-        .catch(err => console.log(err));
-    } else {
-      props.history.push("/login");
-    }
-  };
-
   return (
     <Fragment>
       <br />
@@ -113,11 +82,6 @@ const Cart = props => {
                     color="primary"
                     label={`My Cart (${medicines.cartItems.length})`}
                   />
-                </Grid>
-                <Grid item xs={8}>
-                  <Typography align="right" color="primary">
-                    <FaMapMarkerAlt /> Deliver to :{`${deliverylocation}`}
-                  </Typography>
                 </Grid>
               </Grid>
               {medicines.cartItems.map((i, j) => (
@@ -206,9 +170,15 @@ const Cart = props => {
               </Grid>
               <br />
               <center>
-                {/* <Link style={{ textDecoration: "none" }} to='/' onClick={handleOrder}> */}
-                <Chip label="Pay Now" color="primary" onClick={handleOrder} />
-                {/* </Link> */}
+                {state.medicines.cartItems.length > 0 ? (
+                  <Chip
+                    label="PLACE ORDER"
+                    color="primary"
+                    onClick={() => (window.location.href = "/checkout")}
+                  />
+                ) : (
+                  ""
+                )}
               </center>
             </Paper>
           </Grid>

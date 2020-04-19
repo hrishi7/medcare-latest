@@ -31,8 +31,9 @@ exports.payment = async (req, res) => {
     items: req.body.items,
     amount: data.amount,
     deliveryLocation: req.body.deliveryLocation,
-    delivery: "Under 5 Days",
-    payment: "pending"
+    delivery: req.body.deliveryDate,
+    payment: "pending",
+    paymentMode: "online",
   };
 
   let orderResponse = await Order.create(newOrder);
@@ -40,7 +41,7 @@ exports.payment = async (req, res) => {
   // console.log(orderResponse);
   data.redirect_url += `&order_id=${orderResponse._id}`;
 
-  Insta.createPayment(data, function(error, response) {
+  Insta.createPayment(data, function (error, response) {
     if (error) {
       // some error
     } else {
@@ -63,19 +64,19 @@ exports.paymentCallback = async (req, res) => {
 
     //update the order payment status
     let updateOrder = {
-      payment: "completed"
+      payment: "completed",
     };
 
     await Order.findOneAndUpdate({ _id: responseData.order_id }, updateOrder, {
       new: true,
-      runValidators: true
+      runValidators: true,
     });
 
     //testing
     Insta.getPaymentDetails(
       responseData.payment_request_id,
       responseData.payment_id,
-      async function(error, response) {
+      async function (error, response) {
         if (error) {
           // Some error
         } else {
@@ -89,7 +90,7 @@ exports.paymentCallback = async (req, res) => {
             created_at: response.payment_request.payment.created_at,
             billing_instrument:
               response.payment_request.payment.billing_instrument,
-            userId: responseData.user_id
+            userId: responseData.user_id,
           };
 
           await Payment.create(newPayment);
@@ -100,4 +101,21 @@ exports.paymentCallback = async (req, res) => {
     // Redirect the user to payment complete page.
     return res.redirect("http://localhost:3000/payment-complete");
   }
+};
+
+exports.orderPlaceWithCod = async (req, res) => {
+  let newOrder = {
+    purpose: req.body.purpose,
+    userEmail: req.body.email,
+    items: req.body.items,
+    amount: req.body.amount,
+    deliveryLocation: req.body.deliveryLocation,
+    delivery: req.body.deliveryDate,
+    payment: "completed",
+    paymentMode: "offline",
+  };
+
+  await Order.create(newOrder);
+  // Redirect the user to payment complete page.
+  return res.json({ url: "http://localhost:3000/payment-complete" });
 };
