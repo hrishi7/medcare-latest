@@ -97,6 +97,7 @@ const MyOrder = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <Chip
+                      style={{ marginBottom: "14px" }}
                       variant="outlined"
                       color="primary"
                       label={`My Orders (${orders.length})`}
@@ -105,8 +106,8 @@ const MyOrder = () => {
                 </Grid>
                 {orders.map((i, j) => (
                   <ExpansionPanel
-                    expanded={expanded === "panel1"}
-                    onChange={handleChange("panel1")}
+                    expanded={expanded === j}
+                    onChange={handleChange(j)}
                   >
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                       <Grid container spacing={2} key={j}>

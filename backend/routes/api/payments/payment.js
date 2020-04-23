@@ -3,7 +3,11 @@ const router = express.Router();
 
 const passport = require("passport");
 
-const { payment, paymentCallback } = require("../../../controllers/payments");
+const {
+  payment,
+  paymentCallback,
+  orderPlaceWithCod,
+} = require("../../../controllers/payments");
 
 /**
  * @route GET /api/v1/payment/pay
@@ -14,15 +18,18 @@ const { payment, paymentCallback } = require("../../../controllers/payments");
 router.post("/pay", payment);
 
 /**
+ * @route POST /api/v1/payment/placeOrder
+ * @desc post order place
+ * @access private
+ */
+router.post("/placeOrder", orderPlaceWithCod);
+
+/**
  * @route GET /api/v1/payment/callback/
  * @desc Call back url for instamojo
  * @access public
  */
 
-router.get(
-  "/callback/",
-
-  paymentCallback
-);
+router.get("/callback/", paymentCallback);
 
 module.exports = router;

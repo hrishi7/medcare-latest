@@ -14,7 +14,10 @@ import Container from "@material-ui/core/Container";
 import setAuthToken from "../../utils/setAuthToken";
 import axios from "axios";
 import { proxy } from "../../proxy";
-import { GOOGLE_API_KEY } from "../../config/config";
+import {
+  getFormattedAddress,
+  getLatitudeLongitude,
+} from "../../utils/helperFunctions";
 
 const useStyles = makeStyles((theme) => ({
   "@global": {
@@ -120,36 +123,12 @@ const UpdateProductStock = (props) => {
     }
   };
 
-  const getLatitudeLongitude = async () => {
-    setAuthToken(null);
-    let response = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?key=${GOOGLE_API_KEY}&address=${storeLocation}`
-    );
-    if (response.status === 200) {
-      return response.data.results[0].geometry.location;
-    } else {
-      return undefined;
-    }
-  };
-
-  const getFormattedAddress = async (lat, lng) => {
-    setAuthToken(null);
-    let response = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
-    );
-    if (response.status == 200) {
-      return response.data.results[0].formatted_address;
-    } else {
-      return undefined;
-    }
-  };
-
   const handleUpdateStock = async () => {
     /**getting lat,long,seller_id,stockAmount
      * and update medicine stock accordingly
      */
     try {
-      let location = await getLatitudeLongitude();
+      let location = await getLatitudeLongitude(storeLocation);
       if (location !== undefined) {
         let updateStock = {
           medicine: selectedOption.value,

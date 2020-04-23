@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardMedia,
   CardContent,
-  CardActions
+  CardActions,
 } from "@material-ui/core/";
 import { FaCartPlus } from "react-icons/fa";
 import { proxy } from "../../proxy";
@@ -24,34 +24,34 @@ import { proxy } from "../../proxy";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getInitialProducts,
-  addToCartAction
+  addToCartAction,
 } from "../../actions/medicineActions";
 import axios from "axios";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   grow: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   card: {
-    maxWidth: 345
+    maxWidth: 345,
   },
   media: {
     height: 0,
-    paddingTop: "56.25%" // 16:9
+    paddingTop: "56.25%", // 16:9
   },
   expand: {
     transform: "rotate(0deg)",
     marginLeft: "auto",
     transition: theme.transitions.create("transform", {
-      duration: theme.transitions.duration.shortest
-    })
+      duration: theme.transitions.duration.shortest,
+    }),
   },
   expandOpen: {
-    transform: "rotate(180deg)"
+    transform: "rotate(180deg)",
   },
   avatar: {
-    backgroundColor: "#ff00d4"
-  }
+    backgroundColor: "#ff00d4",
+  },
 }));
 
 // const medicine = [
@@ -126,17 +126,19 @@ const useStyles = makeStyles(theme => ({
 export default function Home() {
   const classes = useStyles();
   const dispatch = useDispatch();
-  let medicines = useSelector(state => {
+  let medicines = useSelector((state) => {
     return state.medicines;
   });
   const [snakeData, setSnakeData] = useState({ open: false, message: "" });
 
-  const addToCart = async id => {
-    const existInCart = await medicines.cartItems.find(f => f._id === id);
+  const addToCart = async (id) => {
+    const existInCart = await medicines.cartItems.find((f) => f._id === id);
     if (existInCart) {
       return setSnakeData({ open: true, message: "Already in Cart" });
     }
-    const addNew = await medicines.products.find(f => f._id === id);
+    const addNew = await medicines.products.find((f) => f._id === id);
+    //by default quanity will be 1
+    addNew.quantity = 1;
     if (addNew) {
       dispatch(addToCartAction(addNew));
       setSnakeData({ open: true, message: "New Product Added" });
@@ -193,7 +195,7 @@ export default function Home() {
         </center>
         <Grid container spacing={2}>
           {medicines.products &&
-            medicines.products.map(d => (
+            medicines.products.map((d) => (
               <Grid item xs={12} md={4} key={d.name}>
                 <Card className={classes.card}>
                   <CardHeader
@@ -222,9 +224,9 @@ export default function Home() {
                   <CardContent>
                     <Typography variant="body2" color="textSecondary" paragraph>
                       Description:
-                      {d.highlights.map(element => element + ",")}
+                      {d.highlights.map((element) => element + ",")}
                       Disease:
-                      {d.diseases.map(element => element + ",")}
+                      {d.diseases.map((element) => element + ",")}
                     </Typography>
                     <CardActions disableSpacing>
                       <Chip

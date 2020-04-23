@@ -25,6 +25,9 @@ import {
 import { Link } from "react-router-dom";
 import { logoutUser } from "../../actions/authActions";
 import { CartContext } from "./CartContext";
+import MyDrawer from "./MyDrawer";
+
+import Media from "react-media";
 
 import jwt_decode from "jwt-decode";
 import SearchBar from "./SearchBar";
@@ -44,6 +47,7 @@ const useStyles = makeStyles((theme) => ({
   logo: {
     maxwidth: "160px",
     maxHeight: "50px",
+    cursor: "pointer",
   },
   content: {
     flexGrow: 1,
@@ -123,53 +127,72 @@ const Header = (props) => {
       <CssBaseline />
       <HideOnScroll>
         <AppBar color="default">
-          <Toolbar>
-            <Link to="/">
-              <img
-                src="https://res.cloudinary.com/hrishi7/image/upload/v1586783076/medcareLogo.png"
-                alt="Medicare"
-                className={classes.logo}
-              />
-            </Link>
-            <div className={classes.grow} />
-            <div className={classes.search}>
-              <SearchBar />
-            </div>
-            <IconButton color="primary" onClick={handleMic}>
-              <FaMicrophone />
-            </IconButton>
-            <IconButton color="primary" onClick={uploadFile}>
-              <FaCloudUploadAlt />
-            </IconButton>
-            <div className={classes.grow} />
-            {/* navigation for unauthorized users */}
-            {!auth.isAuthenticated ? (
-              <UnauthorizedNavbar
-                classes={classes}
-                cartItems={state.medicines.cartItems}
-              />
-            ) : (
-              (user != "" && user.role === "user" && (
-                <UserNavbar
-                  classes={classes}
-                  handleLogout={handleLogout}
-                  cartItems={state.medicines.cartItems}
-                />
-              )) ||
-              (user != "" && user.role === "seller" && (
-                <SellerNavbar classes={classes} handleLogout={handleLogout} />
-              )) ||
-              (user != "" && user.role === "admin" && (
-                <AdminNavbar classes={classes} handleLogout={handleLogout} />
-              )) ||
-              (user != "" && user.role === "deliveryperson" && (
-                <DeliveryPersonNavbar
-                  classes={classes}
-                  handleLogout={handleLogout}
-                />
-              ))
+          <Media
+            query="(max-width: 800px)"
+            render={() => (
+              <Toolbar>
+                <MyDrawer />
+              </Toolbar>
             )}
-          </Toolbar>
+          />
+          <Media
+            query="(min-width: 800px)"
+            render={() => (
+              <Toolbar>
+                <img
+                  src="https://res.cloudinary.com/hrishi7/image/upload/v1586783076/medcareLogo.png"
+                  alt="Medicare"
+                  className={classes.logo}
+                  onClick={() => (window.location.href = "/")}
+                />
+
+                <div className={classes.grow} />
+                <div className={classes.search}>
+                  <SearchBar />
+                </div>
+                <IconButton color="primary" onClick={handleMic}>
+                  <FaMicrophone />
+                </IconButton>
+                <IconButton color="primary" onClick={uploadFile}>
+                  <FaCloudUploadAlt />
+                </IconButton>
+                <div className={classes.grow} />
+                {/* navigation for unauthorized users */}
+                {!auth.isAuthenticated ? (
+                  <UnauthorizedNavbar
+                    classes={classes}
+                    cartItems={state.medicines.cartItems}
+                  />
+                ) : (
+                  (user != "" && user.role === "user" && (
+                    <UserNavbar
+                      classes={classes}
+                      handleLogout={handleLogout}
+                      cartItems={state.medicines.cartItems}
+                    />
+                  )) ||
+                  (user != "" && user.role === "seller" && (
+                    <SellerNavbar
+                      classes={classes}
+                      handleLogout={handleLogout}
+                    />
+                  )) ||
+                  (user != "" && user.role === "admin" && (
+                    <AdminNavbar
+                      classes={classes}
+                      handleLogout={handleLogout}
+                    />
+                  )) ||
+                  (user != "" && user.role === "deliveryperson" && (
+                    <DeliveryPersonNavbar
+                      classes={classes}
+                      handleLogout={handleLogout}
+                    />
+                  ))
+                )}
+              </Toolbar>
+            )}
+          />
         </AppBar>
       </HideOnScroll>
     </div>
