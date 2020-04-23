@@ -9,7 +9,7 @@ import Checkout from "../Customers/Checkout";
 import Register from "./Register";
 
 /**private routes */
-import SellerDashboard from "../PrivateComponents/SellerDashboard";
+
 import AdminDashboard from "../PrivateComponents/AdminDashboard";
 import DeliveryPersonDashboard from "../PrivateComponents/DeliveryPersonDashboard";
 import UserProfile from "../PrivateComponents/UserProfile";
@@ -17,6 +17,9 @@ import UserProfile from "../PrivateComponents/UserProfile";
 /**seller private routes */
 import UpdateProductStock from "../Sellers/UpdateProductStock";
 import AddProduct from "../Sellers/AddProduct";
+import SellerDashboard from "../Sellers/SellerDashboard";
+import ManageOrders from "../Sellers/ManageOrders";
+import SellerNotification from "../Sellers/SellerNotification";
 
 /**private routes */
 import PrivateRouteSeller from "../PrivateRoutes/PrivateRouteSeller";
@@ -46,8 +49,23 @@ function MainRoute() {
         />
       </Switch>
       <Switch>
+        <PrivateRouteSeller
+          exact
+          path="/seller-notification"
+          component={SellerNotification}
+        />
+      </Switch>
+      <Switch>
+        <PrivateRouteSeller
+          exact
+          path="/seller-manage-orders"
+          component={ManageOrders}
+        />
+      </Switch>
+      <Switch>
         <PrivateRouteSeller exact path="/addProduct" component={AddProduct} />
       </Switch>
+
       <Switch>
         <PrivateRouteAdmin
           exact

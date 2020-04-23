@@ -9,10 +9,13 @@ const passport = require("passport");
 const index = require("./routes/api/index");
 const cloudinary = require("cloudinary").v2;
 
+const socketIo = require("socket.io");
+const SellerOrder = require("./models/SellerOrder");
+
 cloudinary.config({
   cloud_name: "hrishi7",
   api_key: "541159897319149",
-  api_secret: "8w0_0un3DGPm5_auzEgbCssRg4w"
+  api_secret: "8w0_0un3DGPm5_auzEgbCssRg4w",
 });
 
 /**Midlewares declarations */
@@ -40,3 +43,26 @@ const server = app.listen(
   PORT,
   console.log(`Server Running in ${process.env.NODE_ENV} mode on port ${PORT}`)
 );
+
+const io = socketIo(server);
+
+app.set("socket", io);
+
+io.on("connection", (socket) => {
+  console.log("New client connected");
+  pipeline = [
+    {
+      $match: { operationType: "insert" },
+    },
+  ];
+  // Define change stream
+  const changeStream = SellerOrder.watch(pipeline);
+  // start listen to changes
+  changeStream.on("change", function (event) {
+    socket.emit("FromServer", event.fullDocument);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
+});
