@@ -14,7 +14,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { proxy } from "../../proxy";
-import { getSellerOrdersAction } from "../../actions/orderActions";
+import {
+  getSellerOrdersAction,
+  updateSellerOrderAction,
+  pushNewSellerOrdersAction,
+} from "../../actions/orderActions";
 import setAuthToken from "../../utils/setAuthToken";
 import socketIOClient from "socket.io-client";
 
@@ -56,7 +60,7 @@ const ManageOrders = () => {
   };
 
   const getActiveStep = (level) => {
-    steps.map((step, index) => {
+    steps.forEach((step, index) => {
       if (step == level) return index;
     });
   };
@@ -67,10 +71,34 @@ const ManageOrders = () => {
   const dispatch = useDispatch();
   useEffect(async () => {
     setAuthToken(localStorage.getItem("jwtToken"));
-    let orders = await axios.get(`${proxy}/api/v1/orders/sellerorders/orders`);
-    console.log(orders);
-    dispatch(getSellerOrdersAction(orders.data));
+    let sellerorders = await axios.get(
+      `${proxy}/api/v1/orders/sellerorders/orders`
+    );
+    dispatch(getSellerOrdersAction(sellerorders.data));
+
+    /**socket listener for realtime update */
+    const socket = socketIOClient(proxy);
+    socket.on("FromServer", (data) => {
+      /**check if seller id and data seller id same then only give notification otherwise not */
+
+      if (data.sellerId == state.auth.user.id) {
+        dispatch(pushNewSellerOrdersAction(data));
+      }
+    });
   }, []);
+
+  const handleUpdateStatus = async (i) => {
+    let stepIndex = steps.indexOf(i.status);
+    if (stepIndex <= 1 && stepIndex != -1) {
+      let nextStatus = steps[stepIndex + 1];
+      setAuthToken(localStorage.getItem("jwtToken"));
+      let response = await axios.put(
+        `${proxy}/api/v1/orders/updateItem/${i.orderId}/${i.medicineId}`,
+        { status: nextStatus }
+      );
+      dispatch(updateSellerOrderAction(response.data));
+    }
+  };
   return (
     <>
       <center>List Out all Orders</center>
@@ -148,27 +176,15 @@ const ManageOrders = () => {
                       </Grid>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails>
-                      <Grid container>
-                        <Grid item xs={6}>
-                          <center>
-                            <p>
-                              Download Invoice
-                              <span>
-                                <IconButton
-                                  aria-label="delete"
-                                  className={classes.margin}
-                                  size="large"
-                                >
-                                  <ArrowDownwardIcon fontSize="inherit" />
-                                </IconButton>
-                              </span>
-                            </p>
-                          </center>
-                        </Grid>
-                        <Grid item xs={12}>
+                      <Grid container direction="column" spacing={2} xs>
+                        <Grid item xs>
                           <Stepper
                             alternativeLabel
-                            activeStep={getActiveStep(i.status)}
+                            activeStep={
+                              steps.indexOf(i.status) < 2
+                                ? steps.indexOf(i.status)
+                                : 4
+                            }
                           >
                             {steps.map((label) => (
                               <Step key={label}>
@@ -177,19 +193,23 @@ const ManageOrders = () => {
                             ))}
                           </Stepper>
                         </Grid>
-                        {getActiveStep(i.status) != 2 ? (
-                          //   <Grid item xs={12}>
-                          <Tooltip title="Status Update">
-                            <IconButton color="primary">
-                              <Button color="primary">
-                                <MdNavigateNext />
-                              </Button>
-                            </IconButton>
-                          </Tooltip>
-                        ) : (
-                          //   </Grid>
-                          ""
-                        )}
+
+                        <Grid item xs>
+                          <center>
+                            {steps.indexOf(i.status) < 2 ? (
+                              <Tooltip title="Status Update">
+                                <IconButton
+                                  color="primary"
+                                  onClick={() => handleUpdateStatus(i)}
+                                >
+                                  <MdNavigateNext />
+                                </IconButton>
+                              </Tooltip>
+                            ) : (
+                              ""
+                            )}
+                          </center>
+                        </Grid>
                       </Grid>
                     </ExpansionPanelDetails>
                   </ExpansionPanel>

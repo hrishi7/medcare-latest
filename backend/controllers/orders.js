@@ -15,22 +15,28 @@ exports.getSellerOrders = async (req, res) => {
   if (role !== "seller") {
     return res.status(401).json({ message: "UnAuthorized" });
   }
-  console.log(typeof _id);
-  let sellerOrders = await SellerOrder.find({ sellerId: _id });
+  let sellerOrders = await SellerOrder.find({ sellerId: _id }).sort({
+    createdAt: -1,
+  });
   res.status(200).json(sellerOrders);
 };
 
 exports.updateItemStatus = async (req, res) => {
   const { orderId, itemId } = req.params;
+
   const { status } = req.body;
 
   const updateStatus = {
     status: status,
   };
-  await SellerOrder.findOneAndUpdate({ _id: itemId }, updateStatus, {
-    new: true,
-    runValidators: true,
-  });
+  let updatedSellerOrder = await SellerOrder.findOneAndUpdate(
+    { medicineId: itemId },
+    updateStatus,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
   let order = await Order.findOne({ _id: orderId });
 
@@ -50,4 +56,5 @@ exports.updateItemStatus = async (req, res) => {
       runValidators: true,
     }
   );
+  res.status(200).json(updatedSellerOrder);
 };
