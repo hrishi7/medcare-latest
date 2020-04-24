@@ -308,10 +308,6 @@ export default function CheckoutSteps(props) {
                 >
                   <b>Item</b> : {order.item}
                 </Typography>
-                <Typography variant="body2">
-                  {" "}
-                  <b>Seller</b> : {order.seller.seller}
-                </Typography>
               </ListItem>
             ))}
           </List>
