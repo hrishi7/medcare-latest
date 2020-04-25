@@ -41,7 +41,13 @@ const useStyles = makeStyles((theme) => ({
 const MyOrder = () => {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(3);
-  const steps = getSteps();
+  const steps = [
+    "Ordered",
+    "Received Order",
+    "Packaging is done",
+    "On The way",
+    "Delivered",
+  ];
   const [expanded, setExpanded] = React.useState(false);
 
   const handleChange = (panel) => (event, isExpanded) => {
@@ -51,39 +57,14 @@ const MyOrder = () => {
     return <div>showing medicine list</div>;
   };
 
-  function getSteps() {
-    return [
-      "Ordered",
-      "Received Order",
-      "Packaging is done",
-      "On The way",
-      "Delivered",
-    ];
-  }
-
-  function getStepContent(step) {
-    switch (step) {
-      case 0:
-        return "Ordered";
-      case 1:
-        return "Received Order";
-      case 2:
-        return "Packaging is done";
-      case 3:
-        return "On The way";
-      default:
-        return "Delivered";
-    }
-  }
-
   const state = useSelector((state) => state);
   let orders = state.orders.orders;
   const dispatch = useDispatch();
   useEffect(async () => {
     let user = state.auth.user;
     setAuthToken(localStorage.getItem("jwtToken"));
-    let orders = await axios.get(`${proxy}/api/v1/orders/${user.email}`);
-    dispatch(getOrdersAction(orders.data));
+    let response = await axios.get(`${proxy}/api/v1/orders/${user.email}`);
+    dispatch(getOrdersAction(response.data));
   }, []);
   return (
     <>
@@ -133,7 +114,7 @@ const MyOrder = () => {
                           <Chip
                             style={{ width: "40%" }}
                             size="large"
-                            label={`₹ ${i.amount}`}
+                            label={`₹ ${Math.round(i.amount)}`}
                             color="primary"
                           />
                         </Grid>
@@ -215,7 +196,14 @@ const MyOrder = () => {
                           </center>
                         </Grid>
                         <Grid item xs={12}>
-                          <Stepper alternativeLabel activeStep={activeStep}>
+                          <Stepper
+                            alternativeLabel
+                            activeStep={
+                              steps.indexOf(i.status) <= 3
+                                ? steps.indexOf(i.status)
+                                : 5
+                            }
+                          >
                             {steps.map((label) => (
                               <Step key={label}>
                                 <StepLabel>{label}</StepLabel>
