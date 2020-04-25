@@ -22,6 +22,7 @@ import CheckoutSteps from "../common/CheckoutSteps";
 const useStyles = makeStyles((theme) => ({
   cart: {
     padding: "10px",
+    borderRadius: "25px",
   },
   itemImg: {
     width: "135px",
@@ -43,62 +44,23 @@ const Checkout = (props) => {
 
   const [itemPrice, setItemPrice] = useState(0);
   const [deliveryFee, setDeliveryFee] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [deliverylocation, setDeliveryLocation] = useState(
-    "45, Tollygunge, Kolkata-40"
-  );
 
   const totalSum = async () => {
     let price = 0;
     let items = medicines.cartItems;
     items.forEach((element, i) => {
-      price += +element.discountedPrice;
+      price += +element.discountedPrice * element.quantity;
       if (i == items.length - 1) {
         if (+price < 1000) {
           setDeliveryFee(50);
-          setItemPrice(price);
-          setTotal(itemPrice + deliveryFee);
+          setItemPrice(Math.round(price));
         } else {
-          setItemPrice(price);
-          setTotal(price + deliveryFee);
+          setDeliveryFee(0);
+          setItemPrice(Math.round(price));
         }
       }
     });
   };
-
-  const handleRemove = (id, j) => {
-    if (id) {
-      dispatch(removeFromCartAction(id));
-    }
-  };
-
-  // const handleOrder = () => {
-  //   if (itemPrice + deliveryFee <= 0) {
-  //     return alert("Please Add product to cart to order");
-  //   }
-  //   if (auth.isAuthenticated && auth.user.role === "user") {
-  //     let user = auth.user;
-  //     let paymentData = {
-  //       items: medicines.cartItems,
-  //       deliveryLocation: deliverylocation,
-  //       purpose: "Purchase Medicine",
-  //       amount: itemPrice + deliveryFee,
-  //       buyer_name: user.name,
-  //       email: user.email,
-  //       // phone: user.mobile,
-  //       redirect_url: `http://localhost:5000/api/v1/payment/callback?user_id=${user.id}&user_email=${user.email}`,
-  //       webhook_url: "/webhook/",
-  //     };
-  //     axios
-  //       .post("http://localhost:5000/api/v1/payment/pay", paymentData)
-  //       .then((res) => {
-  //         window.location.href = res.data;
-  //       })
-  //       .catch((err) => console.log(err));
-  //   } else {
-  //     props.history.push("/login");
-  //   }
-  // };
 
   return (
     <Fragment>
@@ -115,6 +77,74 @@ const Checkout = (props) => {
             />
           </Grid>
           <Grid item xs={12} md={3}>
+            <Paper className={classes.cart}>
+              <Typography
+                variant="subtitle2"
+                style={{
+                  color: "#21314d",
+                  fontWeight: "bold",
+                  fontSize: "18px",
+                }}
+              >
+                PRICE DETAILS
+              </Typography>
+              <br />
+              <Divider />
+              <br />
+              <Grid container>
+                <Grid item xs={6}>
+                  <Typography
+                    color="primary"
+                    style={{
+                      color: "#21314d",
+                    }}
+                  >
+                    Subtotal ({medicines.cartItems.length} item) :
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography align="right" color="secondary">
+                    {`₹ ${itemPrice}`}
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography
+                    style={{
+                      color: "#21314d",
+                    }}
+                  >
+                    Delivery Fee :
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography align="right" color="secondary">
+                    {`₹ ${deliveryFee}`}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <br />
+                  <Divider />
+                  <br />
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography
+                    style={{
+                      color: "#21314d",
+                    }}
+                  >
+                    Total Payable :
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography align="right" color="secondary">
+                    {`₹ ${itemPrice + deliveryFee}`}
+                  </Typography>
+                </Grid>
+              </Grid>
+              <br />
+            </Paper>
+          </Grid>
+          {/* <Grid item xs={12} md={3}>
             <Paper className={classes.cart}>
               <Typography variant="subtitle2">PRICE DETAILS</Typography>
               <br />
@@ -154,7 +184,7 @@ const Checkout = (props) => {
                 </Grid>
               </Grid>
             </Paper>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Container>
     </Fragment>

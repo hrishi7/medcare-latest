@@ -8,6 +8,7 @@ import {
   Divider,
   Tooltip,
   Button,
+  Box,
   Typography,
 } from "@material-ui/core/";
 
@@ -30,6 +31,7 @@ import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import IconButton from "@material-ui/core/IconButton";
 
 import { MdNavigateNext } from "react-icons/md";
+import { BsCircleFill } from "react-icons/bs";
 
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
@@ -38,11 +40,37 @@ import StepLabel from "@material-ui/core/StepLabel";
 const useStyles = makeStyles((theme) => ({
   cart: {
     padding: "10px",
+    borderRadius: "25px",
   },
   itemImg: {
     width: "135px",
     height: "126px",
     borderRadius: 10,
+  },
+  labelContainer: {
+    "& $alternativeLabel": {
+      marginTop: 0,
+    },
+  },
+  step: {
+    "& $completed": {
+      color: "#32a060",
+    },
+    "& $active": {
+      color: "#f05637",
+    },
+    "& $disabled": {
+      color: "#21314d",
+    },
+  },
+  alternativeLabel: {},
+  active: {}, //needed so that the &$active tag works
+  completed: {},
+  disabled: {},
+  labelContainer: {
+    "& $alternativeLabel": {
+      marginTop: 0,
+    },
   },
 }));
 
@@ -101,7 +129,18 @@ const ManageOrders = () => {
   };
   return (
     <>
-      <center>List Out all Orders</center>
+      <center>
+        <Typography
+          component="h1"
+          style={{ color: "#21314d" }}
+          font
+          variant="h5"
+        >
+          <Box fontWeight="fontWeightBold" m={1}>
+            Manage Orders
+          </Box>
+        </Typography>
+      </center>
       <Fragment>
         <br />
         <Container>
@@ -111,10 +150,13 @@ const ManageOrders = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <Chip
-                      style={{ marginBottom: "14px" }}
+                      style={{
+                        marginBottom: "14px",
+                        color: "#21314d",
+                        fontWeight: "bold",
+                      }}
                       variant="outlined"
-                      color="primary"
-                      label={`My Orders (${orders.length})`}
+                      label={`Orders (${orders.length})`}
                     />
                   </Grid>
                 </Grid>
@@ -126,18 +168,25 @@ const ManageOrders = () => {
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                       <Grid container spacing={2} key={j}>
                         <Grid item xs={4}>
-                          <Typography color="primary">
+                          <Typography style={{ color: "#21314d" }}>
                             Medicine:{i.medicineName}
                           </Typography>
 
                           <br />
-                          <Typography variant="body2">
+                          <Typography
+                            variant="body2"
+                            style={{ color: "#21314d" }}
+                          >
                             Quantity: {i.quantity}
                           </Typography>
                         </Grid>
                         <Grid item xs={4}>
                           <Chip
-                            style={{ width: "auto" }}
+                            style={{
+                              width: "auto",
+                              backgroundColor: "#21314d",
+                              color: "#ffffff",
+                            }}
                             size="large"
                             label={`${i.status}`}
                             color="primary"
@@ -147,23 +196,20 @@ const ManageOrders = () => {
                           <div
                             style={{ display: "flex", flexDirection: "row" }}
                           >
-                            <div
+                            <BsCircleFill
                               style={{
-                                height: "15px",
-                                width: "15px",
-                                backgroundColor: "#5562b6",
-                                borderRadius: "50%",
+                                color: "74af86",
                                 marginTop: "17px",
                                 marginRight: "8px",
                               }}
-                            ></div>
+                            />
                             <div>
                               <b>
                                 <p
                                   style={{
                                     fontFamily: "Roboto, Arial, sans-serif",
                                     fontSize: "14px",
-                                    color: "#212121",
+                                    color: "#21314d",
                                     fontWeight: "25px",
                                   }}
                                 >
@@ -185,10 +231,37 @@ const ManageOrders = () => {
                                 ? steps.indexOf(i.status)
                                 : 4
                             }
+                            classes={{
+                              root: classes.step,
+                              completed: classes.completed,
+                              active: classes.active,
+                            }}
                           >
                             {steps.map((label) => (
-                              <Step key={label}>
-                                <StepLabel>{label}</StepLabel>
+                              <Step
+                                key={label}
+                                classes={{
+                                  root: classes.step,
+                                  completed: classes.completed,
+                                  active: classes.active,
+                                }}
+                              >
+                                <StepLabel
+                                  classes={{
+                                    alternativeLabel: classes.alternativeLabel,
+                                    labelContainer: classes.labelContainer,
+                                  }}
+                                  StepIconProps={{
+                                    classes: {
+                                      root: classes.step,
+                                      completed: classes.completed,
+                                      active: classes.active,
+                                      disabled: classes.disabled,
+                                    },
+                                  }}
+                                >
+                                  {label}
+                                </StepLabel>
                               </Step>
                             ))}
                           </Stepper>
@@ -199,7 +272,11 @@ const ManageOrders = () => {
                             {steps.indexOf(i.status) < 2 ? (
                               <Tooltip title="Status Update">
                                 <IconButton
-                                  color="primary"
+                                  style={{
+                                    backgroundColor: "#21314d",
+                                    color: "#ffffff",
+                                    borderRadius: "45px",
+                                  }}
                                   onClick={() => handleUpdateStatus(i)}
                                 >
                                   <MdNavigateNext />

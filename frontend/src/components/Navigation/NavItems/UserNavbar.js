@@ -10,55 +10,64 @@ import {
   AppBar,
   Button,
   Toolbar,
-  IconButton
+  IconButton,
+  Tooltip,
 } from "@material-ui/core/";
 import { fade } from "@material-ui/core/styles";
 import { Provider } from "react-redux";
 import { IoIosLogIn, IoIosLogOut, IoIosPerson } from "react-icons/io";
+import { FaListUl } from "react-icons/fa";
 import {
   FaMicrophone,
   FaSearch,
   FaCloudUploadAlt,
   FaShoppingCart,
-  FaBell
+  FaBell,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const UserNavbar = (props, classes) => {
   return (
     <div>
-      <IconButton
-        color="primary"
-        onClick={() => (window.location.href = "/notification")}
-      >
-        <FaBell />
-      </IconButton>
-
-      <IconButton
-        color="primary"
-        onClick={() => (window.location.href = "/user-profile")}
-      >
-        <IoIosPerson />
-      </IconButton>
-      <Button
-        color="primary"
-        className="font"
-        onClick={() => (window.location.href = "/myorder")}
-      >
-        Orders
-      </Button>
-      <IconButton
-        color="primary"
-        onClick={() => (window.location.href = "/cart")}
-      >
-        <Badge badgeContent={props.cartItems.length} color="secondary">
-          <FaShoppingCart />
-        </Badge>
-      </IconButton>
-
-      <IconButton color="primary" onClick={props.handleLogout}>
-        <IoIosLogOut />
-      </IconButton>
+      <Tooltip title="Notification">
+        <IconButton
+          style={{ color: "#32a060" }}
+          onClick={() => (window.location.href = "/notification")}
+        >
+          <FaBell />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Profile">
+        <IconButton
+          style={{ color: "#32a060" }}
+          onClick={() => (window.location.href = "/user-profile")}
+        >
+          <IoIosPerson />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Orders">
+        <IconButton
+          style={{ color: "#32a060" }}
+          onClick={() => (window.location.href = "/myorder")}
+        >
+          <FaListUl />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Shopping Cart">
+        <IconButton
+          style={{ color: "#32a060" }}
+          onClick={() => (window.location.href = "/cart")}
+        >
+          <Badge badgeContent={props.cartItems.length} color="secondary">
+            <FaShoppingCart />
+          </Badge>
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Logout">
+        <IconButton style={{ color: "#32a060" }} onClick={props.handleLogout}>
+          <IoIosLogOut />
+        </IconButton>
+      </Tooltip>
     </div>
   );
 };

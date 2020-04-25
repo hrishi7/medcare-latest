@@ -8,9 +8,13 @@ import {
   Button,
   Paper,
   IconButton,
+  Box,
   makeStyles,
+  Tooltip,
+  Icon,
 } from "@material-ui/core";
 import { FaEdit } from "react-icons/fa";
+import { MdUpdate } from "react-icons/md";
 import { useSelector } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
@@ -37,6 +41,17 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  outlinedRoot: {
+    "&:hover $notchedOutline": {
+      borderColor: "#21314d",
+    },
+    "&$focused $notchedOutline": {
+      borderColor: "#32a060",
+      borderWidth: 2,
+    },
+  },
+  notchedOutline: {},
+  focused: {},
 }));
 
 const UserProfile = () => {
@@ -49,6 +64,14 @@ const UserProfile = () => {
   const [edit, setEdit] = useState(false);
   const [updatedPassword, setUpdatedPassword] = useState("");
   const [otp, setOtp] = useState("");
+
+  const InputProps = {
+    classes: {
+      root: classes.outlinedRoot,
+      notchedOutline: classes.notchedOutline,
+      focused: classes.focused,
+    },
+  };
 
   useEffect(() => {
     setName(user.name);
@@ -65,64 +88,93 @@ const UserProfile = () => {
       <Paper className={classes.paper}>
         <Grid container>
           <Grid item xs={8}>
-            <Typography component="h1" color="primary" variant="h5">
-              Profile Information
+            <Typography
+              component="h1"
+              style={{ color: "#21314d" }}
+              font
+              variant="h5"
+            >
+              <Box fontWeight="fontWeightBold" m={1}>
+                Profile Information
+              </Box>
             </Typography>
           </Grid>
           <Grid item xs={4}>
-            <IconButton
-              onClick={() => setEdit(true)}
-              edge="end"
-              color="primary"
-              aria-label="edit"
-            >
-              <FaEdit />
-            </IconButton>
+            <Tooltip title="Edit Information">
+              <IconButton
+                onClick={() => setEdit(true)}
+                edge="end"
+                style={{ color: "#32a060" }}
+                aria-label="edit"
+              >
+                <FaEdit />
+              </IconButton>
+            </Tooltip>
           </Grid>
         </Grid>
         <TextField
-          variant="outlined"
           margin="normal"
           disabled={!edit}
           fullWidth
           value={name}
           onChange={(e) => setName(e.target.value)}
           label="FullName"
+          InputLabelProps={{
+            style: { color: "#32a060" },
+          }}
+          variant="outlined"
+          InputProps={InputProps}
         />
         <TextField
-          variant="outlined"
           margin="normal"
           fullWidth
           disabled={!edit}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           label="Email Address"
+          InputLabelProps={{
+            style: { color: "#32a060" },
+          }}
+          variant="outlined"
+          InputProps={InputProps}
         />
         <TextField
-          variant="outlined"
           margin="normal"
           fullWidth
           disabled={!edit}
           value={mobile}
           onChange={(e) => setMobile(e.target.value)}
           label="Enter Mobile"
+          InputLabelProps={{
+            style: { color: "#32a060" },
+          }}
+          variant="outlined"
+          InputProps={InputProps}
         />
         <TextField
-          variant="outlined"
           margin="normal"
           fullWidth
           disabled
           value={role}
           onChange={(e) => setRole(e.target.value)}
+          InputLabelProps={{
+            style: { color: "#32a060" },
+          }}
+          variant="outlined"
+          InputProps={InputProps}
         />
         <Button
-          fullWidth
           variant="contained"
-          color="primary"
+          style={{
+            color: "#ffffff",
+            backgroundColor: "#21314d",
+            borderRadius: "18px",
+          }}
           onClick={handleUpdate}
           className={classes.submit}
+          endIcon={<Icon style={{ color: "#ffffff" }}>update</Icon>}
         >
-          Update Info
+          Update
         </Button>
       </Paper>
 
