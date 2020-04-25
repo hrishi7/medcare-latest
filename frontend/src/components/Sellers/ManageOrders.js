@@ -6,15 +6,21 @@ import {
   Grid,
   Chip,
   Divider,
+  Tooltip,
+  Button,
   Typography,
 } from "@material-ui/core/";
 
-import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { proxy } from "../../proxy";
-import { getOrdersAction } from "../../actions/orderActions";
+import {
+  getSellerOrdersAction,
+  updateSellerOrderAction,
+  pushNewSellerOrdersAction,
+} from "../../actions/orderActions";
 import setAuthToken from "../../utils/setAuthToken";
+import socketIOClient from "socket.io-client";
 
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
@@ -22,6 +28,8 @@ import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import IconButton from "@material-ui/core/IconButton";
+
+import { MdNavigateNext } from "react-icons/md";
 
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
@@ -38,16 +46,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const MyOrder = () => {
+const ManageOrders = () => {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(3);
-  const steps = [
-    "Ordered",
-    "Received Order",
-    "Packaging is done",
-    "On The way",
-    "Delivered",
-  ];
+  const steps = ["recieved", "packed", "handedover"];
   const [expanded, setExpanded] = React.useState(false);
 
   const handleChange = (panel) => (event, isExpanded) => {
@@ -57,15 +59,46 @@ const MyOrder = () => {
     return <div>showing medicine list</div>;
   };
 
+  const getActiveStep = (level) => {
+    steps.forEach((step, index) => {
+      if (step == level) return index;
+    });
+  };
+
   const state = useSelector((state) => state);
-  let orders = state.orders.orders;
+  let orders = [];
+  orders = state.orders.sellerOrders;
   const dispatch = useDispatch();
   useEffect(async () => {
-    let user = state.auth.user;
     setAuthToken(localStorage.getItem("jwtToken"));
-    let response = await axios.get(`${proxy}/api/v1/orders/${user.email}`);
-    dispatch(getOrdersAction(response.data));
+    let sellerorders = await axios.get(
+      `${proxy}/api/v1/orders/sellerorders/orders`
+    );
+    dispatch(getSellerOrdersAction(sellerorders.data));
+
+    /**socket listener for realtime update */
+    const socket = socketIOClient(proxy);
+    socket.on("FromServer", (data) => {
+      /**check if seller id and data seller id same then only give notification otherwise not */
+
+      if (data.sellerId == state.auth.user.id) {
+        dispatch(pushNewSellerOrdersAction(data));
+      }
+    });
   }, []);
+
+  const handleUpdateStatus = async (i) => {
+    let stepIndex = steps.indexOf(i.status);
+    if (stepIndex <= 1 && stepIndex != -1) {
+      let nextStatus = steps[stepIndex + 1];
+      setAuthToken(localStorage.getItem("jwtToken"));
+      let response = await axios.put(
+        `${proxy}/api/v1/orders/updateItem/${i.orderId}/${i.medicineId}`,
+        { status: nextStatus }
+      );
+      dispatch(updateSellerOrderAction(response.data));
+    }
+  };
   return (
     <>
       <center>List Out all Orders</center>
@@ -92,29 +125,21 @@ const MyOrder = () => {
                   >
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                       <Grid container spacing={2} key={j}>
-                        {/* <Grid item xs={12}>
-                          <Divider />
-                        </Grid> */}
                         <Grid item xs={4}>
-                          <Typography color="primary">{i.purpose}</Typography>
-
-                          <Typography
-                            variant="body2"
-                            color="primary"
-                            onMouseOver={renderMedicineList()}
-                          >
-                            {`${i.items.length} items`}
+                          <Typography color="primary">
+                            Medicine:{i.medicineName}
                           </Typography>
+
                           <br />
                           <Typography variant="body2">
-                            Ordered On: {i.createdAt}
+                            Quantity: {i.quantity}
                           </Typography>
                         </Grid>
                         <Grid item xs={4}>
                           <Chip
-                            style={{ width: "40%" }}
+                            style={{ width: "auto" }}
                             size="large"
-                            label={`₹ ${Math.round(i.amount)}`}
+                            label={`${i.status}`}
                             color="primary"
                           />
                         </Grid>
@@ -142,66 +167,23 @@ const MyOrder = () => {
                                     fontWeight: "25px",
                                   }}
                                 >
-                                  will be Deliver {i.delivery}
+                                  Delivery Person Details
                                 </p>
                               </b>
                             </div>
                           </div>
-                          <Grid item xs={12}>
-                            <p
-                              style={{
-                                fontFamily: "Roboto, Arial, sans-serif",
-                                fontSize: "14px",
-                                color: "#212121",
-                                fontWeight: "25px",
-                              }}
-                            >
-                              10 Days Replacement after Delivered.
-                            </p>
-                          </Grid>
                         </Grid>
                       </Grid>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails>
-                      <Grid container>
-                        <Grid item xs={12}>
-                          <center>
-                            <Typography>Order Details</Typography>
-                          </center>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <center>
-                            <Typography>Delivery Address</Typography>
-
-                            <b>
-                              <p>User Email: {i.userEmail}</p>
-                            </b>
-                            <p>{i.deliveryLocation}</p>
-                          </center>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <center>
-                            <p>
-                              Download Invoice
-                              <span>
-                                <IconButton
-                                  aria-label="delete"
-                                  className={classes.margin}
-                                  size="large"
-                                >
-                                  <ArrowDownwardIcon fontSize="inherit" />
-                                </IconButton>
-                              </span>
-                            </p>
-                          </center>
-                        </Grid>
-                        <Grid item xs={12}>
+                      <Grid container direction="column" spacing={2} xs>
+                        <Grid item xs>
                           <Stepper
                             alternativeLabel
                             activeStep={
-                              steps.indexOf(i.status) <= 3
+                              steps.indexOf(i.status) < 2
                                 ? steps.indexOf(i.status)
-                                : 5
+                                : 4
                             }
                           >
                             {steps.map((label) => (
@@ -210,6 +192,23 @@ const MyOrder = () => {
                               </Step>
                             ))}
                           </Stepper>
+                        </Grid>
+
+                        <Grid item xs>
+                          <center>
+                            {steps.indexOf(i.status) < 2 ? (
+                              <Tooltip title="Status Update">
+                                <IconButton
+                                  color="primary"
+                                  onClick={() => handleUpdateStatus(i)}
+                                >
+                                  <MdNavigateNext />
+                                </IconButton>
+                              </Tooltip>
+                            ) : (
+                              ""
+                            )}
+                          </center>
                         </Grid>
                       </Grid>
                     </ExpansionPanelDetails>
@@ -225,4 +224,4 @@ const MyOrder = () => {
   );
 };
 
-export default MyOrder;
+export default ManageOrders;

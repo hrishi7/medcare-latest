@@ -1,7 +1,8 @@
 import React from "react";
 import { IconButton, Tooltip } from "@material-ui/core/";
 import { IoIosLogIn, IoIosLogOut, IoIosPerson } from "react-icons/io";
-import { MdUpdate, MdAddCircle, MdDashboard } from "react-icons/md";
+import { MdUpdate, MdAddCircle, MdDashboard, MdReorder } from "react-icons/md";
+
 import { FaBell } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
@@ -11,7 +12,7 @@ const SellerNavbar = (props, classes) => {
       <Tooltip title="Notification">
         <IconButton
           color="primary"
-          onClick={() => (window.location.href = "/notification")}
+          onClick={() => (window.location.href = "/seller-notification")}
         >
           <FaBell />
         </IconButton>
@@ -32,7 +33,14 @@ const SellerNavbar = (props, classes) => {
           <MdUpdate />
         </IconButton>
       </Tooltip>
-
+      <Tooltip title="Manage Orders">
+        <IconButton
+          color="primary"
+          onClick={() => (window.location.href = "/seller-manage-orders")}
+        >
+          <MdReorder />
+        </IconButton>
+      </Tooltip>
       <Tooltip title="Dashboard">
         <IconButton
           color="primary"

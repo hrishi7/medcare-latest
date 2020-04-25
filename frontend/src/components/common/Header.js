@@ -120,6 +120,7 @@ const Header = (props) => {
   };
   const handleLogout = () => {
     dispatch(logoutUser());
+    window.location.href = "/login";
   };
 
   return (
