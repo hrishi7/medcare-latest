@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
@@ -6,7 +6,7 @@ import StepLabel from "@material-ui/core/StepLabel";
 import StepContent from "@material-ui/core/StepContent";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
-import { Typography, TextField, Grid, Box } from "@material-ui/core/";
+import { Typography, TextField, Grid, Box, Snackbar } from "@material-ui/core/";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import NavigateAfterIcon from "@material-ui/icons/NavigateNext";
@@ -23,6 +23,7 @@ import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 import { proxy } from "../../proxy";
 import axios from "axios";
+import Loader from "./Loader";
 
 import { clearCartAction } from "../../actions/medicineActions";
 
@@ -129,6 +130,8 @@ export default function CheckoutSteps(props) {
   const steps = getSteps();
 
   const { auth, deliveryFee, itemPrice, data } = props;
+  const [loading, setLoading] = useState(false);
+  const [snakeData, setSnakeData] = useState({ open: false, message: "" });
 
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
@@ -152,8 +155,10 @@ export default function CheckoutSteps(props) {
 
   const handleNext = async () => {
     if (activeStep == 1) {
+      setLoading(true);
       let crd = await getLatitudeLongitude(deliveryLocation);
       settingOrderSummary({ latitude: crd.lat, longitude: crd.lng });
+      setLoading(false);
     }
     if (activeStep == 3) {
       handleOrderPlace();
@@ -195,10 +200,12 @@ export default function CheckoutSteps(props) {
           redirect_url: `${proxy}/api/v1/payment/callback?user_id=${user.id}&user_email=${email}`,
           webhook_url: "/webhook/",
         };
+        setLoading(true);
         let response = await axios.post(
           `${proxy}/api/v1/payment/pay`,
           paymentData
         );
+        setLoading(false);
         if (response.status == 200) clearCartAction();
         /**clear all states */
         clearStates();
@@ -226,10 +233,12 @@ export default function CheckoutSteps(props) {
         deliveryLocation: deliveryLocation,
         deliveryDate: deliveryDate,
       };
+      setLoading(true);
       let response = await axios.post(
         `${proxy}/api/v1/payment/placeOrder`,
         orderData
       );
+      setLoading(false);
       if (response.status == 200) clearCartAction();
       /**clear all states */
       clearStates();
@@ -488,7 +497,9 @@ export default function CheckoutSteps(props) {
 
   async function success(pos) {
     var crd = pos.coords;
+    setLoading(true);
     let storeLoc = await getFormattedAddress(crd.latitude, crd.longitude);
+    setLoading(false);
     setDeliveryLocation(storeLoc);
     settingOrderSummary(crd);
   }
@@ -582,6 +593,7 @@ export default function CheckoutSteps(props) {
 
   return (
     <Paper className={classes.cart}>
+      {loading ? <Loader /> : ""}
       <div className={classes.root}>
         <Stepper
           activeStep={activeStep}

@@ -3,7 +3,14 @@ import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import { Link } from "react-router-dom";
 import Typography from "@material-ui/core/Typography";
-import { makeStyles, Paper, Grid, Box, Icon } from "@material-ui/core/";
+import {
+  makeStyles,
+  Paper,
+  Grid,
+  Box,
+  Icon,
+  Snackbar,
+} from "@material-ui/core/";
 import Select from "react-select";
 import { FaBroom } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
@@ -11,6 +18,8 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { proxy } from "../../proxy";
 import setAuthToken from "../../utils/setAuthToken";
+
+import Loader from "../common/Loader";
 
 import { getInitialProducts } from "../../actions/medicineActions";
 import MaterialTable from "material-table";
@@ -76,6 +85,8 @@ const useStyles = makeStyles((theme) => ({
 
 const AddProduct = () => {
   const classes = useStyles();
+  const [loading, setLoading] = useState(false);
+  const [snakeData, setSnakeData] = useState({ open: false, message: "" });
   const medicines = useSelector((state) => state.medicines.products);
   const dispatch = useDispatch();
   const [pageMaxSize, setPageMaxSize] = useState(5);
@@ -121,7 +132,9 @@ const AddProduct = () => {
   };
 
   const getMedicines = async () => {
+    setLoading(true);
     let products = await axios.get(`${proxy}/api/v1/medicines/`);
+    setLoading(false);
     dispatch(getInitialProducts(products.data));
   };
 
@@ -133,6 +146,7 @@ const AddProduct = () => {
     try {
       const data = new FormData();
       data.append("photo", file, file.name);
+      setLoading(true);
       let response = await axios.post(
         `${proxy}/api/v1/medicines/uploadImage`,
         data,
@@ -144,12 +158,14 @@ const AddProduct = () => {
           },
         }
       );
+      setLoading(false);
       if (response.status == 200) {
         setPhotoUrl(response.data.photoUrl);
-        alert("Image Uploded!!");
+        setSnakeData({ open: true, message: "Image Uploded!!" });
       }
     } catch (error) {
-      alert(error.response.data.message);
+      setLoading(false);
+      setSnakeData({ open: true, message: error.response.data.message });
     }
   };
 
@@ -172,33 +188,41 @@ const AddProduct = () => {
         if (id !== "") {
           /**update */
           setAuthToken(localStorage.getItem("jwtToken"));
+          setLoading(true);
           let response = await axios.put(
             `${proxy}/api/v1/medicines/${id}`,
             newMedicineData
           );
+          setLoading(false);
           if (response.status == 200) {
-            alert("Updated Succesfully");
+            setSnakeData({ open: true, message: "Updated Succesfully" });
             clearForm();
             getMedicines();
           }
         } else {
           /**insert */
           setAuthToken(localStorage.getItem("jwtToken"));
+          setLoading(true);
           let response = await axios.post(
             `${proxy}/api/v1/medicines`,
             newMedicineData
           );
+          setLoading(false);
           if (response.status == 201) {
-            alert("Saved Succesfully");
+            setSnakeData({ open: true, message: "Saved Succesfully" });
             clearForm();
             getMedicines();
           }
         }
       } catch (error) {
-        alert(error.response.data.message);
+        setLoading(false);
+        setSnakeData({ open: true, message: error.response.data.message });
       }
     } else {
-      alert("Please fill required filed marked with *");
+      setSnakeData({
+        open: true,
+        message: "Please fill required filed marked with *",
+      });
     }
   };
 
@@ -279,15 +303,18 @@ const AddProduct = () => {
       if (id !== "") {
         /**update */
         setAuthToken(localStorage.getItem("jwtToken"));
+        setLoading(true);
         let response = await axios.delete(`${proxy}/api/v1/medicines/${id}`);
+        setLoading(false);
         if (response.status == 200) {
-          alert("Deleted Succesfully");
+          setSnakeData({ open: true, message: "Deleted Succesfully" });
           clearForm();
           getMedicines();
         }
       }
     } catch (error) {
-      alert(error.response.data.message);
+      setLoading(false);
+      setSnakeData({ open: true, message: error.response.data.message });
     }
   };
 
@@ -300,6 +327,17 @@ const AddProduct = () => {
 
   return (
     <Grid container direction="row">
+      {loading ? <Loader /> : ""}
+      {snakeData.open ? (
+        <Snackbar
+          open={snakeData.open}
+          message={snakeData.message}
+          onClose={() => setSnakeData({ open: false, message: "" })}
+          autoHideDuration={6000}
+        />
+      ) : (
+        ""
+      )}
       <Grid item xs>
         <Paper
           style={{
@@ -459,7 +497,7 @@ const AddProduct = () => {
         <MaterialTable
           style={{
             padding: "10px",
-            margin: "10px",
+            margin: "15px",
             borderRadius: "25px",
           }}
           title={

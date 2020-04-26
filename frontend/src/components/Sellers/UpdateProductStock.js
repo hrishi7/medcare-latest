@@ -3,7 +3,14 @@ import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
-import { makeStyles, Paper, Grid, Box, Icon } from "@material-ui/core/";
+import {
+  makeStyles,
+  Paper,
+  Grid,
+  Box,
+  Icon,
+  Snackbar,
+} from "@material-ui/core/";
 import Select from "react-select";
 import { fade } from "@material-ui/core/styles";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
@@ -14,6 +21,7 @@ import Container from "@material-ui/core/Container";
 import setAuthToken from "../../utils/setAuthToken";
 import axios from "axios";
 import { proxy } from "../../proxy";
+import Loader from "../common/Loader";
 import {
   getFormattedAddress,
   getLatitudeLongitude,
@@ -86,6 +94,9 @@ const useStyles = makeStyles((theme) => ({
 const UpdateProductStock = (props) => {
   const dispatch = useDispatch();
 
+  const [loading, setLoading] = useState(false);
+  const [snakeData, setSnakeData] = useState({ open: false, message: "" });
+
   let medicines = useSelector((state) => state.medicines);
   let user = useSelector((state) => state.auth.user);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -108,7 +119,9 @@ const UpdateProductStock = (props) => {
     },
   };
   const getMedicines = async () => {
+    setLoading(true);
     let products = await axios.get(`${proxy}/api/v1/medicines/`);
+    setLoading(false);
     dispatch(getInitialProducts(products.data));
   };
 
@@ -129,7 +142,9 @@ const UpdateProductStock = (props) => {
 
   async function success(pos) {
     var crd = pos.coords;
+    setLoading(true);
     let storeLoc = await getFormattedAddress(crd.latitude, crd.longitude);
+    setLoading(false);
     setStoreLocation(storeLoc);
   }
 
@@ -141,7 +156,10 @@ const UpdateProductStock = (props) => {
     if (navigator.geolocation) {
       return navigator.geolocation.getCurrentPosition(success, error, option);
     } else {
-      alert("Detect Location feature Not supported");
+      setSnakeData({
+        open: true,
+        message: "Detect Location feature Not supported",
+      });
     }
   };
 
@@ -159,20 +177,27 @@ const UpdateProductStock = (props) => {
           locLongitude: location.lng,
         };
         setAuthToken(localStorage.getItem("jwtToken"));
+        setLoading(true);
         let response = await axios.post(
           `${proxy}/api/v1/medicines/updateStock`,
           updateStock
         );
+        setLoading(false);
         if (response.status == 200) {
-          alert("Stock Updated!");
+          setSnakeData({ open: true, message: "Stock Updated" });
+
           clearForm();
           getMedicines();
         }
       } else {
-        alert("Problem with getting location please eneter proper address");
+        setSnakeData({
+          open: true,
+          message: "Problem with getting location please eneter proper address",
+        });
       }
     } catch (error) {
-      alert(error.response.data.message);
+      setLoading(false);
+      setSnakeData({ open: true, message: error.response.data.message });
       return;
     }
   };
@@ -193,10 +218,12 @@ const UpdateProductStock = (props) => {
           element.stock.map(async (st) => {
             if (st.seller == user.id) {
               /**set state with proper value */
+              setLoading(true);
               let storeLoc = await getFormattedAddress(
                 st.locLatitude,
                 st.locLongitude
               );
+              setLoading(false);
               let storeAmt = st.stockAmount;
               setStoreLocation(storeLoc);
               setStockAmount(storeAmt);
@@ -210,6 +237,17 @@ const UpdateProductStock = (props) => {
 
   return (
     <Container component="main" maxWidth="xs">
+      {loading ? <Loader /> : ""}
+      {snakeData.open ? (
+        <Snackbar
+          open={snakeData.open}
+          message={snakeData.message}
+          onClose={() => setSnakeData({ open: false, message: "" })}
+          autoHideDuration={6000}
+        />
+      ) : (
+        ""
+      )}
       <CssBaseline />
       <Paper className={classes.paper}>
         <Typography

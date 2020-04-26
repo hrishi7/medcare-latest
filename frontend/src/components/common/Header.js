@@ -64,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
   toolbar: theme.mixins.toolbar,
   search: {
     position: "relative",
-    // borderRadius: theme.shape.borderRadius,
+    borderRadius: theme.shape.borderRadius,
     borderColor: "#74af86",
     backgroundColor: fade("#74af86", 0.15),
     "&:hover": {
@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
     },
     marginRight: theme.spacing(2),
     marginLeft: 0,
-    width: "100%",
+    width: "auto",
     [theme.breakpoints.up("sm")]: {
       marginLeft: theme.spacing(3),
       width: "auto",

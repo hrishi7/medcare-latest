@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   makeStyles,
   Paper,
@@ -25,6 +25,8 @@ import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import IconButton from "@material-ui/core/IconButton";
 
 import { BsCircleFill } from "react-icons/bs";
+
+import Loader from "../common/Loader";
 
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
@@ -69,6 +71,7 @@ const useStyles = makeStyles((theme) => ({
 
 const MyOrder = () => {
   const classes = useStyles();
+  const [loading, setLoading] = useState(false);
   const [activeStep, setActiveStep] = React.useState(3);
   const steps = [
     "Ordered",
@@ -92,11 +95,14 @@ const MyOrder = () => {
   useEffect(async () => {
     let user = state.auth.user;
     setAuthToken(localStorage.getItem("jwtToken"));
+    setLoading(true);
     let response = await axios.get(`${proxy}/api/v1/orders/${user.email}`);
+    setLoading(false);
     dispatch(getOrdersAction(response.data));
   }, []);
   return (
     <>
+      {loading ? <Loader /> : ""}
       <center>
         <Typography
           component="h1"

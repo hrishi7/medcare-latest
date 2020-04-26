@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   makeStyles,
   Paper,
@@ -33,9 +33,13 @@ import IconButton from "@material-ui/core/IconButton";
 import { MdNavigateNext } from "react-icons/md";
 import { BsCircleFill } from "react-icons/bs";
 
+import Loader from "../common/Loader";
+
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
+
+import loader from "../common/Loader";
 
 const useStyles = makeStyles((theme) => ({
   cart: {
@@ -76,6 +80,8 @@ const useStyles = makeStyles((theme) => ({
 
 const ManageOrders = () => {
   const classes = useStyles();
+  const [loading, setLoading] = useState(false);
+
   const [activeStep, setActiveStep] = React.useState(3);
   const steps = ["recieved", "packed", "handedover"];
   const [expanded, setExpanded] = React.useState(false);
@@ -99,9 +105,11 @@ const ManageOrders = () => {
   const dispatch = useDispatch();
   useEffect(async () => {
     setAuthToken(localStorage.getItem("jwtToken"));
+    setLoading(true);
     let sellerorders = await axios.get(
       `${proxy}/api/v1/orders/sellerorders/orders`
     );
+    setLoading(false);
     dispatch(getSellerOrdersAction(sellerorders.data));
 
     /**socket listener for realtime update */
@@ -120,15 +128,18 @@ const ManageOrders = () => {
     if (stepIndex <= 1 && stepIndex != -1) {
       let nextStatus = steps[stepIndex + 1];
       setAuthToken(localStorage.getItem("jwtToken"));
+      setLoading(true);
       let response = await axios.put(
         `${proxy}/api/v1/orders/updateItem/${i.orderId}/${i.medicineId}`,
         { status: nextStatus }
       );
+      setLoading(false);
       dispatch(updateSellerOrderAction(response.data));
     }
   };
   return (
     <>
+      {loading ? <Loader /> : ""}
       <center>
         <Typography
           component="h1"

@@ -17,6 +17,8 @@ import { FaEdit } from "react-icons/fa";
 import { MdUpdate } from "react-icons/md";
 import { useSelector } from "react-redux";
 
+import Loader from "../common/Loader";
+
 const useStyles = makeStyles((theme) => ({
   "@global": {
     body: {
@@ -56,6 +58,10 @@ const useStyles = makeStyles((theme) => ({
 
 const UserProfile = () => {
   const classes = useStyles();
+
+  const [loading, setLoading] = useState(false);
+  const [snakeData, setSnakeData] = useState({ open: false, message: "" });
+
   const user = useSelector((state) => state.auth.user);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -84,6 +90,7 @@ const UserProfile = () => {
 
   return (
     <Container component="main" maxWidth="xs">
+      {loading ? <Loader /> : ""}
       <CssBaseline />
       <Paper className={classes.paper}>
         <Grid container>

@@ -21,6 +21,7 @@ import {
 } from "@material-ui/core/";
 import { FaCartPlus } from "react-icons/fa";
 import { proxy } from "../../proxy";
+import Loader from "./Loader";
 
 //redux
 import { useSelector, useDispatch } from "react-redux";
@@ -63,14 +64,19 @@ export default function Home() {
   let medicines = useSelector((state) => {
     return state.medicines;
   });
+  const [loading, setLoading] = useState(false);
   const [snakeData, setSnakeData] = useState({ open: false, message: "" });
 
   const addToCart = async (id) => {
+    setLoading(true);
     const existInCart = await medicines.cartItems.find((f) => f._id === id);
+    setLoading(false);
     if (existInCart) {
       return setSnakeData({ open: true, message: "Already in Cart" });
     }
+    setLoading(true);
     const addNew = await medicines.products.find((f) => f._id === id);
+    setLoading(false);
     //by default quanity will be 1
     addNew.quantity = 1;
     if (addNew) {
@@ -81,12 +87,15 @@ export default function Home() {
 
   useEffect(async () => {
     //call backend for initial products
+    setLoading(true);
     let products = await axios.get(`${proxy}/api/v1/medicines/`);
+    setLoading(false);
     dispatch(getInitialProducts(products.data));
   }, []);
 
   return (
     <Fragment>
+      {loading ? <Loader /> : ""}
       <Carousel showThumbs={false} infiniteLoop useKeyboardArrows autoPlay>
         <div>
           <img

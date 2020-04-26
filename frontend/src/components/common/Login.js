@@ -7,10 +7,10 @@ import { Link } from "react-router-dom";
 import Grid from "@material-ui/core/Grid";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
-import { makeStyles, Paper, Icon, Box } from "@material-ui/core/";
+import { makeStyles, Paper, Icon, Box, Snackbar } from "@material-ui/core/";
 import Container from "@material-ui/core/Container";
 
-import { IoMdLogIn } from "react-icons/io";
+import Loader from "./Loader";
 
 import axios from "axios";
 
@@ -66,6 +66,8 @@ export default function Login(props) {
   const dispatch = useDispatch();
 
   const classes = useStyles();
+  const [loading, setLoading] = useState(false);
+  const [snakeData, setSnakeData] = useState({ open: false, message: "" });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -75,14 +77,23 @@ export default function Login(props) {
       password,
     };
     try {
+      setLoading(true);
       let response = await axios.post(`${proxy}/api/v1/auth/login`, user);
+      setLoading(false);
       if (response.status == 200) {
-        alert("!!Congratulations Login Successfull");
+        setSnakeData({
+          open: true,
+          message: "Congratulations Login Successfull",
+        });
         let token = response.data.token;
         dispatch(setCurrentUser(token));
       }
     } catch (error) {
-      alert(error.response.data.message);
+      setLoading(false);
+      setSnakeData({
+        open: true,
+        message: error.response.data.message,
+      });
     }
   };
 
@@ -103,6 +114,18 @@ export default function Login(props) {
 
   return (
     <Container component="main" maxWidth="xs">
+      {loading ? <Loader /> : ""}
+      {snakeData.open ? (
+        <Snackbar
+          open={snakeData.open}
+          message={snakeData.message}
+          onClose={() => setSnakeData({ open: false, message: "" })}
+          autoHideDuration={6000}
+        />
+      ) : (
+        ""
+      )}
+
       <CssBaseline />
       <Paper className={classes.paper}>
         <Avatar className={classes.avatar}>

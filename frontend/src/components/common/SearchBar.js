@@ -14,6 +14,18 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: theme.spacing(1),
     fontSize: theme.spacing(3),
   },
+  selectEmpty: {
+    paddingLeft: "6px",
+    backgroundColor: "#ffffff",
+    color: "#21314d",
+  },
+  select: {
+    color: "#21314d",
+    fontWeight: "bold",
+    "&:not([multiple]) option": {
+      backgroundColor: "#ffffff",
+    },
+  },
 }));
 
 export default function SearchBar(props) {
@@ -43,6 +55,10 @@ export default function SearchBar(props) {
           isSearchable
           isClearable
           placeholder="Search Medicine"
+          classes={{
+            root: classes.selectEmpty,
+            select: classes.select,
+          }}
         />
       </Grid>
     </Grid>
