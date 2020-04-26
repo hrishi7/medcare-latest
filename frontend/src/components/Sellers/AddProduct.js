@@ -3,14 +3,23 @@ import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import { Link } from "react-router-dom";
 import Typography from "@material-ui/core/Typography";
-import { makeStyles, Paper, Grid } from "@material-ui/core/";
+import {
+  makeStyles,
+  Paper,
+  Grid,
+  Box,
+  Icon,
+  Snackbar,
+} from "@material-ui/core/";
 import Select from "react-select";
-
+import { FaBroom } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 
 import axios from "axios";
 import { proxy } from "../../proxy";
 import setAuthToken from "../../utils/setAuthToken";
+
+import Loader from "../common/Loader";
 
 import { getInitialProducts } from "../../actions/medicineActions";
 import MaterialTable from "material-table";
@@ -61,9 +70,23 @@ const useStyles = makeStyles((theme) => ({
     marginTop: "9px",
     borderRadius: "5px",
   },
+  outlinedRoot: {
+    "&:hover $notchedOutline": {
+      borderColor: "#21314d",
+    },
+    "&$focused $notchedOutline": {
+      borderColor: "#32a060",
+      borderWidth: 2,
+    },
+  },
+  notchedOutline: {},
+  focused: {},
 }));
 
 const AddProduct = () => {
+  const classes = useStyles();
+  const [loading, setLoading] = useState(false);
+  const [snakeData, setSnakeData] = useState({ open: false, message: "" });
   const medicines = useSelector((state) => state.medicines.products);
   const dispatch = useDispatch();
   const [pageMaxSize, setPageMaxSize] = useState(5);
@@ -83,8 +106,14 @@ const AddProduct = () => {
   const [diseases, setDiseases] = useState("");
   const [price, setPrice] = useState("");
   const [discountPercent, setDiscountPercent] = useState("");
+  const InputProps = {
+    classes: {
+      root: classes.outlinedRoot,
+      notchedOutline: classes.notchedOutline,
+      focused: classes.focused,
+    },
+  };
 
-  const classes = useStyles();
   useEffect(async () => {
     getMedicines();
   }, []);
@@ -103,7 +132,9 @@ const AddProduct = () => {
   };
 
   const getMedicines = async () => {
+    setLoading(true);
     let products = await axios.get(`${proxy}/api/v1/medicines/`);
+    setLoading(false);
     dispatch(getInitialProducts(products.data));
   };
 
@@ -115,6 +146,7 @@ const AddProduct = () => {
     try {
       const data = new FormData();
       data.append("photo", file, file.name);
+      setLoading(true);
       let response = await axios.post(
         `${proxy}/api/v1/medicines/uploadImage`,
         data,
@@ -126,12 +158,14 @@ const AddProduct = () => {
           },
         }
       );
+      setLoading(false);
       if (response.status == 200) {
         setPhotoUrl(response.data.photoUrl);
-        alert("Image Uploded!!");
+        setSnakeData({ open: true, message: "Image Uploded!!" });
       }
     } catch (error) {
-      alert(error.response.data.message);
+      setLoading(false);
+      setSnakeData({ open: true, message: error.response.data.message });
     }
   };
 
@@ -154,33 +188,41 @@ const AddProduct = () => {
         if (id !== "") {
           /**update */
           setAuthToken(localStorage.getItem("jwtToken"));
+          setLoading(true);
           let response = await axios.put(
             `${proxy}/api/v1/medicines/${id}`,
             newMedicineData
           );
+          setLoading(false);
           if (response.status == 200) {
-            alert("Updated Succesfully");
+            setSnakeData({ open: true, message: "Updated Succesfully" });
             clearForm();
             getMedicines();
           }
         } else {
           /**insert */
           setAuthToken(localStorage.getItem("jwtToken"));
+          setLoading(true);
           let response = await axios.post(
             `${proxy}/api/v1/medicines`,
             newMedicineData
           );
+          setLoading(false);
           if (response.status == 201) {
-            alert("Saved Succesfully");
+            setSnakeData({ open: true, message: "Saved Succesfully" });
             clearForm();
             getMedicines();
           }
         }
       } catch (error) {
-        alert(error.response.data.message);
+        setLoading(false);
+        setSnakeData({ open: true, message: error.response.data.message });
       }
     } else {
-      alert("Please fill required filed marked with *");
+      setSnakeData({
+        open: true,
+        message: "Please fill required filed marked with *",
+      });
     }
   };
 
@@ -261,15 +303,18 @@ const AddProduct = () => {
       if (id !== "") {
         /**update */
         setAuthToken(localStorage.getItem("jwtToken"));
+        setLoading(true);
         let response = await axios.delete(`${proxy}/api/v1/medicines/${id}`);
+        setLoading(false);
         if (response.status == 200) {
-          alert("Deleted Succesfully");
+          setSnakeData({ open: true, message: "Deleted Succesfully" });
           clearForm();
           getMedicines();
         }
       }
     } catch (error) {
-      alert(error.response.data.message);
+      setLoading(false);
+      setSnakeData({ open: true, message: error.response.data.message });
     }
   };
 
@@ -281,12 +326,39 @@ const AddProduct = () => {
   };
 
   return (
-    <div className={classes.container}>
-      <div item xs className={classes.paper}>
-        <Paper style={{ paddingLeft: 40, paddingRight: 40 }}>
-          <Typography component="h1" color="primary" variant="h5">
-            Add Medicine
-          </Typography>
+    <Grid container direction="row">
+      {loading ? <Loader /> : ""}
+      {snakeData.open ? (
+        <Snackbar
+          open={snakeData.open}
+          message={snakeData.message}
+          onClose={() => setSnakeData({ open: false, message: "" })}
+          autoHideDuration={6000}
+        />
+      ) : (
+        ""
+      )}
+      <Grid item xs>
+        <Paper
+          style={{
+            padding: "10px",
+            margin: "10px",
+
+            borderRadius: "25px",
+          }}
+        >
+          <center>
+            <Typography
+              component="h1"
+              style={{ color: "#21314d" }}
+              font
+              variant="h5"
+            >
+              <Box fontWeight="fontWeightBold" m={1}>
+                Add Medicine
+              </Box>
+            </Typography>
+          </center>
           <TextField
             required
             variant="outlined"
@@ -295,6 +367,11 @@ const AddProduct = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             label="Enter Medicine Name"
+            InputLabelProps={{
+              style: { color: "#32a060" },
+            }}
+            variant="outlined"
+            InputProps={InputProps}
           />
           <Select
             required
@@ -308,14 +385,20 @@ const AddProduct = () => {
             isSearchable
             isClearable
             placeholder="select Category"
-            autoFocus
+            InputLabelProps={{
+              style: { color: "#32a060" },
+            }}
+            variant="outlined"
+            InputProps={InputProps}
           />
+
           <TextField
-            label="Photo"
-            // value={photoFile}
             type="file"
             onChange={(e) => ImageUpload(e.target.files[0])}
             fullWidth
+            style={{ marginTop: "9px" }}
+            variant="outlined"
+            InputProps={InputProps}
           />
           <TextField
             variant="outlined"
@@ -326,6 +409,11 @@ const AddProduct = () => {
             rows="4"
             value={highlights}
             onChange={(e) => setHighlights(e.target.value)}
+            InputLabelProps={{
+              style: { color: "#32a060" },
+            }}
+            variant="outlined"
+            InputProps={InputProps}
           />
 
           <TextField
@@ -337,6 +425,11 @@ const AddProduct = () => {
             rows="4"
             value={diseases}
             onChange={(e) => setDiseases(e.target.value)}
+            InputLabelProps={{
+              style: { color: "#32a060" },
+            }}
+            variant="outlined"
+            InputProps={InputProps}
           />
           <TextField
             variant="outlined"
@@ -347,6 +440,11 @@ const AddProduct = () => {
             type="Number"
             onChange={(e) => setPrice(e.target.value)}
             required
+            InputLabelProps={{
+              style: { color: "#32a060" },
+            }}
+            variant="outlined"
+            InputProps={InputProps}
           />
           <TextField
             variant="outlined"
@@ -357,27 +455,70 @@ const AddProduct = () => {
             onChange={(e) => setDiscountPercent(e.target.value)}
             required
             fullWidth
+            InputLabelProps={{
+              style: { color: "#32a060" },
+            }}
+            variant="outlined"
+            InputProps={InputProps}
           />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            className={classes.submit}
-          >
-            {buttonText}
-          </Button>
+          <center>
+            <Button
+              variant="contained"
+              style={{
+                color: "#ffffff",
+                backgroundColor: "#21314d",
+                borderRadius: "18px",
+              }}
+              onClick={handleSubmit}
+              className={classes.submit}
+              endIcon={<Icon style={{ color: "#ffffff" }}>send</Icon>}
+            >
+              {buttonText}
+            </Button>
+            <Button
+              variant="contained"
+              style={{
+                color: "#21314d",
+                backgroundColor: "#f1f2f3",
+                borderRadius: "18px",
+                marginLeft: "6px",
+              }}
+              onClick={clearForm}
+              className={classes.submit}
+              endIcon={<FaBroom />}
+            >
+              CLEAR
+            </Button>
+          </center>
         </Paper>
-      </div>
-      <div item xs className={classes.table}>
+      </Grid>
+
+      <Grid item xs>
         <MaterialTable
-          title={"Medicines"}
+          style={{
+            padding: "10px",
+            margin: "15px",
+            borderRadius: "25px",
+          }}
+          title={
+            <Typography
+              component="h1"
+              style={{ color: "#21314d" }}
+              font
+              variant="h6"
+            >
+              <Box fontWeight="fontWeightBold" m={1}>
+                Medicines
+              </Box>
+            </Typography>
+          }
           columns={renderColumns()}
           data={renderData()}
           actions={renderActions()}
           options={renderOptions()}
         />
-      </div>
-    </div>
+      </Grid>
+    </Grid>
   );
 };
 

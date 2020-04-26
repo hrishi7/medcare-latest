@@ -3,10 +3,17 @@ import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
-import { makeStyles, Paper, Grid } from "@material-ui/core/";
+import {
+  makeStyles,
+  Paper,
+  Grid,
+  Box,
+  Icon,
+  Snackbar,
+} from "@material-ui/core/";
 import Select from "react-select";
 import { fade } from "@material-ui/core/styles";
-
+import MyLocationIcon from "@material-ui/icons/MyLocation";
 import { useSelector, useDispatch } from "react-redux";
 import { getInitialProducts } from "../../actions/medicineActions";
 
@@ -14,6 +21,7 @@ import Container from "@material-ui/core/Container";
 import setAuthToken from "../../utils/setAuthToken";
 import axios from "axios";
 import { proxy } from "../../proxy";
+import Loader from "../common/Loader";
 import {
   getFormattedAddress,
   getLatitudeLongitude,
@@ -31,6 +39,11 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     padding: 10,
     alignItems: "center",
+    borderRadius: "25px",
+  },
+  button: {
+    marginTop: theme.spacing(1),
+    marginRight: theme.spacing(1),
   },
   avatar: {
     margin: theme.spacing(1),
@@ -65,10 +78,24 @@ const useStyles = makeStyles((theme) => ({
   addMedicine: {
     marginBottom: "3px",
   },
+  outlinedRoot: {
+    "&:hover $notchedOutline": {
+      borderColor: "#21314d",
+    },
+    "&$focused $notchedOutline": {
+      borderColor: "#32a060",
+      borderWidth: 2,
+    },
+  },
+  notchedOutline: {},
+  focused: {},
 }));
 
 const UpdateProductStock = (props) => {
   const dispatch = useDispatch();
+
+  const [loading, setLoading] = useState(false);
+  const [snakeData, setSnakeData] = useState({ open: false, message: "" });
 
   let medicines = useSelector((state) => state.medicines);
   let user = useSelector((state) => state.auth.user);
@@ -84,9 +111,17 @@ const UpdateProductStock = (props) => {
   const [stockAmount, setStockAmount] = useState("");
 
   const classes = useStyles();
-
+  const InputProps = {
+    classes: {
+      root: classes.outlinedRoot,
+      notchedOutline: classes.notchedOutline,
+      focused: classes.focused,
+    },
+  };
   const getMedicines = async () => {
+    setLoading(true);
     let products = await axios.get(`${proxy}/api/v1/medicines/`);
+    setLoading(false);
     dispatch(getInitialProducts(products.data));
   };
 
@@ -107,7 +142,9 @@ const UpdateProductStock = (props) => {
 
   async function success(pos) {
     var crd = pos.coords;
+    setLoading(true);
     let storeLoc = await getFormattedAddress(crd.latitude, crd.longitude);
+    setLoading(false);
     setStoreLocation(storeLoc);
   }
 
@@ -119,7 +156,10 @@ const UpdateProductStock = (props) => {
     if (navigator.geolocation) {
       return navigator.geolocation.getCurrentPosition(success, error, option);
     } else {
-      alert("Detect Location feature Not supported");
+      setSnakeData({
+        open: true,
+        message: "Detect Location feature Not supported",
+      });
     }
   };
 
@@ -137,20 +177,27 @@ const UpdateProductStock = (props) => {
           locLongitude: location.lng,
         };
         setAuthToken(localStorage.getItem("jwtToken"));
+        setLoading(true);
         let response = await axios.post(
           `${proxy}/api/v1/medicines/updateStock`,
           updateStock
         );
+        setLoading(false);
         if (response.status == 200) {
-          alert("Stock Updated!");
+          setSnakeData({ open: true, message: "Stock Updated" });
+
           clearForm();
           getMedicines();
         }
       } else {
-        alert("Problem with getting location please eneter proper address");
+        setSnakeData({
+          open: true,
+          message: "Problem with getting location please eneter proper address",
+        });
       }
     } catch (error) {
-      alert(error.response.data.message);
+      setLoading(false);
+      setSnakeData({ open: true, message: error.response.data.message });
       return;
     }
   };
@@ -171,10 +218,12 @@ const UpdateProductStock = (props) => {
           element.stock.map(async (st) => {
             if (st.seller == user.id) {
               /**set state with proper value */
+              setLoading(true);
               let storeLoc = await getFormattedAddress(
                 st.locLatitude,
                 st.locLongitude
               );
+              setLoading(false);
               let storeAmt = st.stockAmount;
               setStoreLocation(storeLoc);
               setStockAmount(storeAmt);
@@ -188,12 +237,33 @@ const UpdateProductStock = (props) => {
 
   return (
     <Container component="main" maxWidth="xs">
+      {loading ? <Loader /> : ""}
+      {snakeData.open ? (
+        <Snackbar
+          open={snakeData.open}
+          message={snakeData.message}
+          onClose={() => setSnakeData({ open: false, message: "" })}
+          autoHideDuration={6000}
+        />
+      ) : (
+        ""
+      )}
       <CssBaseline />
       <Paper className={classes.paper}>
-        <Typography component="h1" color="primary" variant="h5">
-          Update Medicine Stock
+        <Typography
+          align="center"
+          component="h1"
+          style={{ color: "#21314d" }}
+          font
+          variant="h5"
+        >
+          <Box fontWeight="fontWeightBold" m={1}>
+            Update Medicine Stock
+          </Box>
         </Typography>
+
         <Select
+          styles={{ marginTop: "9px", marginBottom: "9px" }}
           className={classes.selectBox}
           value={selectedOption}
           onChange={(e) => handleMedicineSelect(e)}
@@ -203,18 +273,21 @@ const UpdateProductStock = (props) => {
           }))}
           isSearchable
           isClearable
-          placeholder="select Medicine"
-          autoFocus
+          placeholder="Select Medicine"
         />
         <Typography
           color="primary"
           variant="subtitle1"
-          style={{ marginTop: "3px" }}
+          style={{ marginTop: "9px", color: "#21314d" }}
         >
           Not in the list?{" "}
           <Button
             variant="contained"
-            color="secondary"
+            style={{
+              backgroundColor: "#21314d",
+              color: "#ffffff",
+              borderRadius: "15px",
+            }}
             onClick={() => props.history.push("/addProduct")}
             className={classes.addMedicine}
           >
@@ -228,12 +301,25 @@ const UpdateProductStock = (props) => {
           value={storeLocation}
           onChange={(e) => setStoreLocation(e.target.value)}
           label="Enter Store Location"
-          autoFocus
+          InputLabelProps={{
+            style: { color: "#32a060" },
+          }}
+          variant="outlined"
+          InputProps={InputProps}
         />
-        <Typography component="h5" color="secondary" variant="h5">
+        <Typography component="h5" style={{ color: "#21314d" }} variant="body">
           OR
         </Typography>
         <Button
+          variant="contained"
+          style={{ color: "#21314d" }}
+          onClick={() => handleDetectLocation()}
+          className={classes.button}
+          startIcon={<MyLocationIcon />}
+        >
+          Detect Location
+        </Button>
+        {/* <Button
           fullWidth
           variant="contained"
           color="secondary"
@@ -241,7 +327,7 @@ const UpdateProductStock = (props) => {
           className={classes.submit}
         >
           Get Location
-        </Button>
+        </Button> */}
         <TextField
           variant="outlined"
           margin="normal"
@@ -251,8 +337,26 @@ const UpdateProductStock = (props) => {
           onChange={(e) => setStockAmount(e.target.value)}
           label="Stock Amount(Unit)"
           type="number"
+          InputLabelProps={{
+            style: { color: "#32a060" },
+          }}
+          variant="outlined"
+          InputProps={InputProps}
         />
         <Button
+          variant="contained"
+          style={{
+            color: "#ffffff",
+            backgroundColor: "#21314d",
+            borderRadius: "18px",
+          }}
+          onClick={handleUpdateStock}
+          className={classes.submit}
+          endIcon={<Icon style={{ color: "#ffffff" }}>send</Icon>}
+        >
+          Update
+        </Button>
+        {/* <Button
           fullWidth
           variant="contained"
           color="primary"
@@ -260,7 +364,7 @@ const UpdateProductStock = (props) => {
           className={classes.submit}
         >
           Update
-        </Button>
+        </Button> */}
       </Paper>
       <div style={{ height: "24vh" }}></div>
     </Container>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
@@ -6,7 +6,7 @@ import StepLabel from "@material-ui/core/StepLabel";
 import StepContent from "@material-ui/core/StepContent";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
-import { Typography, TextField, Grid } from "@material-ui/core/";
+import { Typography, TextField, Grid, Box, Snackbar } from "@material-ui/core/";
 import MyLocationIcon from "@material-ui/icons/MyLocation";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import NavigateAfterIcon from "@material-ui/icons/NavigateNext";
@@ -23,6 +23,7 @@ import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 import { proxy } from "../../proxy";
 import axios from "axios";
+import Loader from "./Loader";
 
 import { clearCartAction } from "../../actions/medicineActions";
 
@@ -34,6 +35,10 @@ import {
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
+  },
+  cart: {
+    padding: "10px",
+    borderRadius: "25px",
   },
   button: {
     marginTop: theme.spacing(1),
@@ -81,6 +86,42 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "#106ba3",
     },
   },
+  labelContainer: {
+    "& $alternativeLabel": {
+      marginTop: 0,
+    },
+  },
+  step: {
+    "& $completed": {
+      color: "#32a060",
+    },
+    "& $active": {
+      color: "#f05637",
+    },
+    "& $disabled": {
+      color: "#21314d",
+    },
+  },
+  alternativeLabel: {},
+  active: {}, //needed so that the &$active tag works
+  completed: {},
+  disabled: {},
+  labelContainer: {
+    "& $alternativeLabel": {
+      marginTop: 0,
+    },
+  },
+  outlinedRoot: {
+    "&:hover $notchedOutline": {
+      borderColor: "#21314d",
+    },
+    "&$focused $notchedOutline": {
+      borderColor: "#32a060",
+      borderWidth: 2,
+    },
+  },
+  notchedOutline: {},
+  focused: {},
 }));
 
 export default function CheckoutSteps(props) {
@@ -89,6 +130,8 @@ export default function CheckoutSteps(props) {
   const steps = getSteps();
 
   const { auth, deliveryFee, itemPrice, data } = props;
+  const [loading, setLoading] = useState(false);
+  const [snakeData, setSnakeData] = useState({ open: false, message: "" });
 
   const [email, setEmail] = React.useState("");
   const [name, setName] = React.useState("");
@@ -98,6 +141,13 @@ export default function CheckoutSteps(props) {
   const [deliveryDate, setDeliveryDate] = React.useState("");
   const [paymentMode, setPaymentMode] = React.useState("");
 
+  const InputProps = {
+    classes: {
+      root: classes.outlinedRoot,
+      notchedOutline: classes.notchedOutline,
+      focused: classes.focused,
+    },
+  };
   useEffect(() => {
     setEmail(auth.user.email);
     setName(auth.user.name);
@@ -105,8 +155,10 @@ export default function CheckoutSteps(props) {
 
   const handleNext = async () => {
     if (activeStep == 1) {
+      setLoading(true);
       let crd = await getLatitudeLongitude(deliveryLocation);
       settingOrderSummary({ latitude: crd.lat, longitude: crd.lng });
+      setLoading(false);
     }
     if (activeStep == 3) {
       handleOrderPlace();
@@ -148,10 +200,12 @@ export default function CheckoutSteps(props) {
           redirect_url: `${proxy}/api/v1/payment/callback?user_id=${user.id}&user_email=${email}`,
           webhook_url: "/webhook/",
         };
+        setLoading(true);
         let response = await axios.post(
           `${proxy}/api/v1/payment/pay`,
           paymentData
         );
+        setLoading(false);
         if (response.status == 200) clearCartAction();
         /**clear all states */
         clearStates();
@@ -179,10 +233,12 @@ export default function CheckoutSteps(props) {
         deliveryLocation: deliveryLocation,
         deliveryDate: deliveryDate,
       };
+      setLoading(true);
       let response = await axios.post(
         `${proxy}/api/v1/payment/placeOrder`,
         orderData
       );
+      setLoading(false);
       if (response.status == 200) clearCartAction();
       /**clear all states */
       clearStates();
@@ -211,7 +267,11 @@ export default function CheckoutSteps(props) {
     return (
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          Customer Infomation
+          <Typography style={{ color: "#21314d" }}>
+            <Box fontWeight="fontWeightBold" m={1}>
+              Customer Infomation
+            </Box>
+          </Typography>
         </Grid>
         <Grid item xs={6}>
           <TextField
@@ -221,6 +281,11 @@ export default function CheckoutSteps(props) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             label="Full Name"
+            InputLabelProps={{
+              style: { color: "#32a060" },
+            }}
+            variant="outlined"
+            InputProps={InputProps}
           />
         </Grid>
         <Grid item xs={6}>
@@ -232,6 +297,11 @@ export default function CheckoutSteps(props) {
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
             label="Mobile Number"
+            InputLabelProps={{
+              style: { color: "#32a060" },
+            }}
+            variant="outlined"
+            InputProps={InputProps}
           />
         </Grid>
         <Grid item xs={6}>
@@ -243,6 +313,11 @@ export default function CheckoutSteps(props) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             label="Email"
+            InputLabelProps={{
+              style: { color: "#32a060" },
+            }}
+            variant="outlined"
+            InputProps={InputProps}
           />
         </Grid>
       </Grid>
@@ -253,12 +328,16 @@ export default function CheckoutSteps(props) {
     return (
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          Delivery Address Info
+          <Typography style={{ color: "#21314d" }}>
+            <Box fontWeight="fontWeightBold" m={1}>
+              Delivery Address Info
+            </Box>
+          </Typography>
         </Grid>
         <Grid item xs={12}>
           <Button
             variant="contained"
-            color="default"
+            style={{ color: "#21314d" }}
             onClick={() => getCoordinate()}
             className={classes.button}
             startIcon={<MyLocationIcon />}
@@ -272,6 +351,11 @@ export default function CheckoutSteps(props) {
             value={deliveryLocation}
             onChange={(e) => settinglatLng(e.target.value)}
             label="Delivery Address"
+            InputLabelProps={{
+              style: { color: "#32a060" },
+            }}
+            variant="outlined"
+            InputProps={InputProps}
           />
         </Grid>
       </Grid>
@@ -283,16 +367,22 @@ export default function CheckoutSteps(props) {
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <center>
-            <b>
-              <p>Order Summary</p>
-            </b>
+            <Typography style={{ color: "#21314d" }}>
+              <Box fontWeight="fontWeightBold" m={1}>
+                Order Summary
+              </Box>
+            </Typography>
           </center>
         </Grid>
         <Grid item xs={6}>
-          Total Items:{props.data.length}
+          <Typography style={{ color: "#21314d" }}>
+            Total Items:{props.data.length}
+          </Typography>
         </Grid>
         <Grid item xs={6}>
-          Expected Delivery On {deliveryDate}{" "}
+          <Typography style={{ color: "#21314d" }}>
+            Expected Delivery On {deliveryDate}{" "}
+          </Typography>
         </Grid>
         <Grid item xs={12}>
           <List component="nav" aria-label="secondary mailbox folders">
@@ -303,6 +393,7 @@ export default function CheckoutSteps(props) {
                     marginRight: "14px",
                     fontFamily: "Arial",
                     fontSize: "22px",
+                    color: "#21314d",
                   }}
                   variant="subtitle1"
                 >
@@ -313,11 +404,15 @@ export default function CheckoutSteps(props) {
           </List>
         </Grid>
         <Grid item xs={12}>
-          Total: ₹ {props.itemPrice}
+          <Typography style={{ color: "#21314d" }}>
+            Total: ₹ {props.itemPrice}
+          </Typography>
         </Grid>
         <Grid item xs={12}>
           <center>
-            Order Confirmation Email will be sent to <b>{email}</b>
+            <Typography style={{ color: "#21314d" }}>
+              Order Confirmation Email will be sent to <b>{email}</b>
+            </Typography>
           </center>
           <Grid></Grid>
         </Grid>
@@ -345,14 +440,18 @@ export default function CheckoutSteps(props) {
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <center>
-            <b>
-              <p>Select Payment Mode</p>
-            </b>
+            <Typography style={{ color: "#21314d" }}>
+              <Box fontWeight="fontWeightBold" m={1}>
+                Select Payment Mode
+              </Box>
+            </Typography>
           </center>
         </Grid>
         <Grid item xs={12}>
           <FormControl component="fieldset" style={{ marginLeft: "40px" }}>
-            <FormLabel component="legend">PAYMENT MODE</FormLabel>
+            <FormLabel component="legend" style={{ color: "#21314d" }}>
+              PAYMENT MODE
+            </FormLabel>
             <RadioGroup
               aria-label="gender"
               name="customized-radios"
@@ -398,7 +497,9 @@ export default function CheckoutSteps(props) {
 
   async function success(pos) {
     var crd = pos.coords;
+    setLoading(true);
     let storeLoc = await getFormattedAddress(crd.latitude, crd.longitude);
+    setLoading(false);
     setDeliveryLocation(storeLoc);
     settingOrderSummary(crd);
   }
@@ -491,47 +592,81 @@ export default function CheckoutSteps(props) {
   }
 
   return (
-    <div className={classes.root}>
-      <Stepper activeStep={activeStep} orientation="vertical">
-        {steps.map((label, index) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-            <StepContent>
-              <Typography>{getStepContent(index)}</Typography>
-              <div className={classes.actionsContainer}>
-                <div>
-                  <Button
-                    disabled={activeStep === 0}
-                    onClick={handleBack}
-                    className={classes.button}
-                    startIcon={<NavigateBeforeIcon />}
-                  ></Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleNext}
-                    className={classes.button}
-                    startIcon={
-                      activeStep === steps.length - 1 ? (
-                        "Place Order"
-                      ) : (
-                        <NavigateAfterIcon />
-                      )
-                    }
-                  ></Button>
+    <Paper className={classes.cart}>
+      {loading ? <Loader /> : ""}
+      <div className={classes.root}>
+        <Stepper
+          activeStep={activeStep}
+          orientation="vertical"
+          classes={{
+            root: classes.step,
+            completed: classes.completed,
+            active: classes.active,
+          }}
+        >
+          {steps.map((label, index) => (
+            <Step
+              key={label}
+              classes={{
+                root: classes.step,
+                completed: classes.completed,
+                active: classes.active,
+              }}
+            >
+              <StepLabel
+                classes={{
+                  alternativeLabel: classes.alternativeLabel,
+                  labelContainer: classes.labelContainer,
+                }}
+                StepIconProps={{
+                  classes: {
+                    root: classes.step,
+                    completed: classes.completed,
+                    active: classes.active,
+                    disabled: classes.disabled,
+                  },
+                }}
+              >
+                {label}
+              </StepLabel>
+              <StepContent>
+                <Typography>{getStepContent(index)}</Typography>
+                <div className={classes.actionsContainer}>
+                  <div>
+                    <Button
+                      style={{
+                        color: "#21314d",
+                        borderRadius: "15px",
+                      }}
+                      disabled={activeStep === 0}
+                      onClick={handleBack}
+                      className={classes.button}
+                      startIcon={<NavigateBeforeIcon />}
+                    ></Button>
+                    <Button
+                      variant="contained"
+                      style={{
+                        backgroundColor: "#21314d",
+                        color: "#ffffff",
+                        borderRadius: "15px",
+                      }}
+                      onClick={handleNext}
+                      className={classes.button}
+                      startIcon={
+                        activeStep === steps.length - 1 ? (
+                          "Place Order"
+                        ) : (
+                          <NavigateAfterIcon />
+                        )
+                      }
+                    ></Button>
+                  </div>
                 </div>
-              </div>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
-      {/* {activeStep === steps.length && (
-        <Paper square elevation={0} className={classes.resetContainer}>
-          <Button onClick={() => handleOrderPlace()} className={classes.button}>
-            Place Order
-          </Button>
-        </Paper>
-      )} */}
-    </div>
+              </StepContent>
+            </Step>
+          ))}
+        </Stepper>
+      </div>
+    </Paper>
   );
 }

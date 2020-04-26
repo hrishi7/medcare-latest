@@ -10,6 +10,7 @@ import {
   Button,
   Toolbar,
   IconButton,
+  Tooltip,
 } from "@material-ui/core/";
 import { fade } from "@material-ui/core/styles";
 import { Provider } from "react-redux";
@@ -64,13 +65,14 @@ const useStyles = makeStyles((theme) => ({
   search: {
     position: "relative",
     borderRadius: theme.shape.borderRadius,
-    backgroundColor: fade("#005aff", 0.15),
+    borderColor: "#74af86",
+    backgroundColor: fade("#74af86", 0.15),
     "&:hover": {
-      backgroundColor: fade("#005aff", 0.25),
+      backgroundColor: fade("#74af86", 0.25),
     },
     marginRight: theme.spacing(2),
     marginLeft: 0,
-    width: "100%",
+    width: "auto",
     [theme.breakpoints.up("sm")]: {
       marginLeft: theme.spacing(3),
       width: "auto",
@@ -127,7 +129,7 @@ const Header = (props) => {
     <div>
       <CssBaseline />
       <HideOnScroll>
-        <AppBar color="default">
+        <AppBar style={{ backgroundColor: "#ffffff" }}>
           <Media
             query="(max-width: 800px)"
             render={() => (
@@ -151,12 +153,16 @@ const Header = (props) => {
                 <div className={classes.search}>
                   <SearchBar />
                 </div>
-                <IconButton color="primary" onClick={handleMic}>
-                  <FaMicrophone />
-                </IconButton>
-                <IconButton color="primary" onClick={uploadFile}>
-                  <FaCloudUploadAlt />
-                </IconButton>
+                <Tooltip title="Voice search">
+                  <IconButton style={{ color: "#32a060" }} onClick={handleMic}>
+                    <FaMicrophone />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Upload Prescription">
+                  <IconButton style={{ color: "#32a060" }} onClick={uploadFile}>
+                    <FaCloudUploadAlt id="icon" />
+                  </IconButton>
+                </Tooltip>
                 <div className={classes.grow} />
                 {/* navigation for unauthorized users */}
                 {!auth.isAuthenticated ? (

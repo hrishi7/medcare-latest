@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   makeStyles,
   Paper,
@@ -6,6 +6,7 @@ import {
   Grid,
   Chip,
   Divider,
+  Box,
   Typography,
 } from "@material-ui/core/";
 
@@ -23,6 +24,10 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import IconButton from "@material-ui/core/IconButton";
 
+import { BsCircleFill } from "react-icons/bs";
+
+import Loader from "../common/Loader";
+
 import Stepper from "@material-ui/core/Stepper";
 import Step from "@material-ui/core/Step";
 import StepLabel from "@material-ui/core/StepLabel";
@@ -30,16 +35,43 @@ import StepLabel from "@material-ui/core/StepLabel";
 const useStyles = makeStyles((theme) => ({
   cart: {
     padding: "10px",
+    borderRadius: "25px",
   },
   itemImg: {
     width: "135px",
     height: "126px",
     borderRadius: 10,
   },
+  labelContainer: {
+    "& $alternativeLabel": {
+      marginTop: 0,
+    },
+  },
+  step: {
+    "& $completed": {
+      color: "#32a060",
+    },
+    "& $active": {
+      color: "#f05637",
+    },
+    "& $disabled": {
+      color: "#21314d",
+    },
+  },
+  alternativeLabel: {},
+  active: {}, //needed so that the &$active tag works
+  completed: {},
+  disabled: {},
+  labelContainer: {
+    "& $alternativeLabel": {
+      marginTop: 0,
+    },
+  },
 }));
 
 const MyOrder = () => {
   const classes = useStyles();
+  const [loading, setLoading] = useState(false);
   const [activeStep, setActiveStep] = React.useState(3);
   const steps = [
     "Ordered",
@@ -63,14 +95,27 @@ const MyOrder = () => {
   useEffect(async () => {
     let user = state.auth.user;
     setAuthToken(localStorage.getItem("jwtToken"));
+    setLoading(true);
     let response = await axios.get(`${proxy}/api/v1/orders/${user.email}`);
+    setLoading(false);
     dispatch(getOrdersAction(response.data));
   }, []);
   return (
     <>
-      <center>List Out all Orders</center>
+      {loading ? <Loader /> : ""}
+      <center>
+        <Typography
+          component="h1"
+          style={{ color: "#21314d" }}
+          font
+          variant="h5"
+        >
+          <Box fontWeight="fontWeightBold" m={1}>
+            Manage Orders
+          </Box>
+        </Typography>
+      </center>
       <Fragment>
-        <br />
         <Container>
           <Grid container spacing={2}>
             <Grid item xs={12} md={12}>
@@ -78,10 +123,13 @@ const MyOrder = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <Chip
-                      style={{ marginBottom: "14px" }}
                       variant="outlined"
-                      color="primary"
                       label={`My Orders (${orders.length})`}
+                      style={{
+                        marginBottom: "14px",
+                        color: "#21314d",
+                        fontWeight: "bold",
+                      }}
                     />
                   </Grid>
                 </Grid>
@@ -92,53 +140,56 @@ const MyOrder = () => {
                   >
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                       <Grid container spacing={2} key={j}>
-                        {/* <Grid item xs={12}>
-                          <Divider />
-                        </Grid> */}
-                        <Grid item xs={4}>
-                          <Typography color="primary">{i.purpose}</Typography>
+                        <Grid item xs>
+                          <Typography style={{ color: "#21314d" }}>
+                            {i.purpose}
+                          </Typography>
 
                           <Typography
                             variant="body2"
-                            color="primary"
+                            style={{ color: "#21314d" }}
                             onMouseOver={renderMedicineList()}
                           >
                             {`${i.items.length} items`}
                           </Typography>
                           <br />
-                          <Typography variant="body2">
+                          <Typography
+                            style={{ color: "#21314d" }}
+                            variant="body2"
+                          >
                             Ordered On: {i.createdAt}
                           </Typography>
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item xs>
                           <Chip
-                            style={{ width: "40%" }}
+                            style={{
+                              width: "auto",
+                              color: "#ffffff",
+                              fontWeight: "bold",
+                              backgroundColor: "#21314d",
+                            }}
                             size="large"
                             label={`₹ ${Math.round(i.amount)}`}
-                            color="primary"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid item xs>
                           <div
                             style={{ display: "flex", flexDirection: "row" }}
                           >
-                            <div
+                            <BsCircleFill
                               style={{
-                                height: "15px",
-                                width: "15px",
-                                backgroundColor: "#5562b6",
-                                borderRadius: "50%",
+                                color: "74af86",
                                 marginTop: "17px",
                                 marginRight: "8px",
                               }}
-                            ></div>
+                            />
                             <div>
                               <b>
                                 <p
                                   style={{
                                     fontFamily: "Roboto, Arial, sans-serif",
                                     fontSize: "14px",
-                                    color: "#212121",
+                                    color: "#21314d",
                                     fontWeight: "25px",
                                   }}
                                 >
@@ -152,7 +203,7 @@ const MyOrder = () => {
                               style={{
                                 fontFamily: "Roboto, Arial, sans-serif",
                                 fontSize: "14px",
-                                color: "#212121",
+                                color: "#21314d",
                                 fontWeight: "25px",
                               }}
                             >
@@ -166,28 +217,48 @@ const MyOrder = () => {
                       <Grid container>
                         <Grid item xs={12}>
                           <center>
-                            <Typography>Order Details</Typography>
+                            <Typography
+                              style={{ color: "#21314d" }}
+                              variant="h5"
+                            >
+                              {" "}
+                              <Box fontWeight="fontWeightBold" m={1}>
+                                Order Details
+                              </Box>
+                            </Typography>
                           </center>
                         </Grid>
                         <Grid item xs={6}>
                           <center>
-                            <Typography>Delivery Address</Typography>
+                            <Typography
+                              style={{ color: "#21314d" }}
+                              variant="h6"
+                            >
+                              <Box fontWeight="fontWeightBold" m={1}>
+                                Delivery Address
+                              </Box>
+                            </Typography>
 
                             <b>
-                              <p>User Email: {i.userEmail}</p>
+                              <p style={{ color: "#21314d" }}>
+                                User Email: {i.userEmail}
+                              </p>
                             </b>
-                            <p>{i.deliveryLocation}</p>
+                            <p style={{ color: "#21314d" }}>
+                              {i.deliveryLocation}
+                            </p>
                           </center>
                         </Grid>
                         <Grid item xs={6}>
                           <center>
-                            <p>
+                            <p style={{ color: "#21314d" }}>
                               Download Invoice
                               <span>
                                 <IconButton
                                   aria-label="delete"
                                   className={classes.margin}
                                   size="large"
+                                  style={{ color: "#32a060" }}
                                 >
                                   <ArrowDownwardIcon fontSize="inherit" />
                                 </IconButton>
@@ -203,10 +274,37 @@ const MyOrder = () => {
                                 ? steps.indexOf(i.status)
                                 : 5
                             }
+                            classes={{
+                              root: classes.step,
+                              completed: classes.completed,
+                              active: classes.active,
+                            }}
                           >
                             {steps.map((label) => (
-                              <Step key={label}>
-                                <StepLabel>{label}</StepLabel>
+                              <Step
+                                key={label}
+                                classes={{
+                                  root: classes.step,
+                                  completed: classes.completed,
+                                  active: classes.active,
+                                }}
+                              >
+                                <StepLabel
+                                  classes={{
+                                    alternativeLabel: classes.alternativeLabel,
+                                    labelContainer: classes.labelContainer,
+                                  }}
+                                  StepIconProps={{
+                                    classes: {
+                                      root: classes.step,
+                                      completed: classes.completed,
+                                      active: classes.active,
+                                      disabled: classes.disabled,
+                                    },
+                                  }}
+                                >
+                                  {label}
+                                </StepLabel>
                               </Step>
                             ))}
                           </Stepper>

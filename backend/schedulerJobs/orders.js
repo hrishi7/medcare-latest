@@ -1,7 +1,6 @@
 const Order = require("../models/Order");
 
 exports.checkAndUpdateOrderStatus = async () => {
-  console.log("called", new Date());
   let orders = await Order.find({ status: "Received Order" });
 
   let updateOrderStatus = [];

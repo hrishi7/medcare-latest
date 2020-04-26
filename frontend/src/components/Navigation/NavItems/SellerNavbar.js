@@ -11,7 +11,7 @@ const SellerNavbar = (props, classes) => {
     <div>
       <Tooltip title="Notification">
         <IconButton
-          color="primary"
+          style={{ color: "#32a060" }}
           onClick={() => (window.location.href = "/seller-notification")}
         >
           <FaBell />
@@ -19,7 +19,7 @@ const SellerNavbar = (props, classes) => {
       </Tooltip>
       <Tooltip title="Add Medicine">
         <IconButton
-          color="primary"
+          style={{ color: "#32a060" }}
           onClick={() => (window.location.href = "/addProduct")}
         >
           <MdAddCircle />
@@ -27,7 +27,7 @@ const SellerNavbar = (props, classes) => {
       </Tooltip>
       <Tooltip title="Stock Update">
         <IconButton
-          color="primary"
+          style={{ color: "#32a060" }}
           onClick={() => (window.location.href = "/update-stock")}
         >
           <MdUpdate />
@@ -35,7 +35,7 @@ const SellerNavbar = (props, classes) => {
       </Tooltip>
       <Tooltip title="Manage Orders">
         <IconButton
-          color="primary"
+          style={{ color: "#32a060" }}
           onClick={() => (window.location.href = "/seller-manage-orders")}
         >
           <MdReorder />
@@ -43,14 +43,14 @@ const SellerNavbar = (props, classes) => {
       </Tooltip>
       <Tooltip title="Dashboard">
         <IconButton
-          color="primary"
+          style={{ color: "#32a060" }}
           onClick={() => (window.location.href = "/seller-dashboard")}
         >
           <MdDashboard />
         </IconButton>
       </Tooltip>
       <Tooltip title="Logout">
-        <IconButton color="primary" onClick={props.handleLogout}>
+        <IconButton style={{ color: "#32a060" }} onClick={props.handleLogout}>
           <IoIosLogOut />
         </IconButton>
       </Tooltip>

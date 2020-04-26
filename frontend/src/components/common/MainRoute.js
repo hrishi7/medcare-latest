@@ -1,18 +1,21 @@
 import React from "react";
 import { Switch, Route } from "react-router-dom";
+
+/**public routes */
+import Register from "./Register";
 import Login from "./Login";
 import Home from "./Home";
 import Cart from "../Customers/Cart";
+
+/**Customer private routes */
 import OrderPlaced from "../Customers/OrderPlaced";
 import MyOrder from "../Customers/MyOrder";
 import Checkout from "../Customers/Checkout";
-import Register from "./Register";
-
+import UserProfile from "../Customers/UserProfile";
 /**private routes */
 
 import AdminDashboard from "../PrivateComponents/AdminDashboard";
 import DeliveryPersonDashboard from "../PrivateComponents/DeliveryPersonDashboard";
-import UserProfile from "../PrivateComponents/UserProfile";
 
 /**seller private routes */
 import UpdateProductStock from "../Sellers/UpdateProductStock";

@@ -15,10 +15,13 @@ import {
   CardHeader,
   CardMedia,
   CardContent,
+  Box,
   CardActions,
+  Tooltip,
 } from "@material-ui/core/";
 import { FaCartPlus } from "react-icons/fa";
 import { proxy } from "../../proxy";
+import Loader from "./Loader";
 
 //redux
 import { useSelector, useDispatch } from "react-redux";
@@ -34,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
   card: {
     maxWidth: 345,
+    borderRadius: "15px",
   },
   media: {
     height: 0,
@@ -50,78 +54,9 @@ const useStyles = makeStyles((theme) => ({
     transform: "rotate(180deg)",
   },
   avatar: {
-    backgroundColor: "#ff00d4",
+    backgroundColor: "#32a060",
   },
 }));
-
-// const medicine = [
-//   {
-//     id: "1",
-//     avatarWord: "R",
-//     title: "Shrimp and Chorizo Paella",
-//     subheader: "September 14, 2019",
-//     img: "https://material-ui.com/static/images/cards/paella.jpg",
-//     desc:
-//       "This impressive paella is a perfect party dish and a fun meal to cook together with your guests. Add 1 cup of frozen peas along with the mussels, if you like.",
-//     sellingPrice: 75,
-//     discount: 16
-//   },
-//   {
-//     id: "2",
-//     avatarWord: "A",
-//     title: "Amberica Dismostic",
-//     subheader: "Octuber 20, 2019",
-//     img: "https://material-ui.com/static/images/cards/paella.jpg",
-//     desc:
-//       "This impressive paella is a perfect party dish and a fun meal to cook together with your guests. Add 1 cup of frozen peas along with the mussels, if you like.",
-//     sellingPrice: 125,
-//     discount: 10
-//   },
-//   {
-//     id: "3",
-//     avatarWord: "S",
-//     title: "Cetrazin 100-MT super Cap",
-//     subheader: "December 22, 2019",
-//     img: "https://material-ui.com/static/images/cards/paella.jpg",
-//     desc:
-//       "This impressive paella is a perfect party dish and a fun meal to cook together with your guests. Add 1 cup of frozen peas along with the mussels, if you like.",
-//     sellingPrice: 85,
-//     discount: 12
-//   },
-//   {
-//     id: "4",
-//     avatarWord: "T",
-//     title: "Toumosin MT plus",
-//     subheader: "September 20, 2019",
-//     img: "https://material-ui.com/static/images/cards/paella.jpg",
-//     desc:
-//       "This impressive paella is a perfect party dish and a fun meal to cook together with your guests. Add 1 cup of frozen peas along with the mussels, if you like.",
-//     sellingPrice: 35,
-//     discount: 15
-//   },
-//   {
-//     id: "5",
-//     avatarWord: "M",
-//     title: "Medorima Supel Gel",
-//     subheader: "November 24, 2019",
-//     img: "https://material-ui.com/static/images/cards/paella.jpg",
-//     desc:
-//       "This impressive paella is a perfect party dish and a fun meal to cook together with your guests. Add 1 cup of frozen peas along with the mussels, if you like.",
-//     sellingPrice: 65,
-//     discount: 5
-//   },
-//   {
-//     id: "6",
-//     avatarWord: "E",
-//     title: "Extereme Super Gel",
-//     subheader: "December 12, 2019",
-//     img: "https://material-ui.com/static/images/cards/paella.jpg",
-//     desc:
-//       "This impressive paella is a perfect party dish and a fun meal to cook together with your guests. Add 1 cup of frozen peas along with the mussels, if you like.",
-//     sellingPrice: 45,
-//     discount: 16
-//   }
-// ];
 
 export default function Home() {
   const classes = useStyles();
@@ -129,14 +64,19 @@ export default function Home() {
   let medicines = useSelector((state) => {
     return state.medicines;
   });
+  const [loading, setLoading] = useState(false);
   const [snakeData, setSnakeData] = useState({ open: false, message: "" });
 
   const addToCart = async (id) => {
+    setLoading(true);
     const existInCart = await medicines.cartItems.find((f) => f._id === id);
+    setLoading(false);
     if (existInCart) {
       return setSnakeData({ open: true, message: "Already in Cart" });
     }
+    setLoading(true);
     const addNew = await medicines.products.find((f) => f._id === id);
+    setLoading(false);
     //by default quanity will be 1
     addNew.quantity = 1;
     if (addNew) {
@@ -147,12 +87,15 @@ export default function Home() {
 
   useEffect(async () => {
     //call backend for initial products
+    setLoading(true);
     let products = await axios.get(`${proxy}/api/v1/medicines/`);
+    setLoading(false);
     dispatch(getInitialProducts(products.data));
   }, []);
 
   return (
     <Fragment>
+      {loading ? <Loader /> : ""}
       <Carousel showThumbs={false} infiniteLoop useKeyboardArrows autoPlay>
         <div>
           <img
@@ -184,12 +127,26 @@ export default function Home() {
         </div>
       </Carousel>
       <Container style={{ marginTop: "5vh" }}>
-        <Typography align="center" color="primary" variant="h5">
-          Medicine : New Arrival
+        <Typography
+          align="center"
+          component="h1"
+          style={{ color: "#21314d" }}
+          font
+          variant="h5"
+        >
+          <Box fontWeight="fontWeightBold" m={1}>
+            Medicine : New Arrival
+          </Box>
         </Typography>
-        <Typography align="center" paragraph gutterBottom>
+        <Typography
+          align="center"
+          paragraph
+          gutterBottom
+          style={{ color: "#9E9E9E" }}
+        >
           New Launched Medicine with best price & quality
         </Typography>
+
         <center>
           <Divider light style={{ width: "40vw", marginBottom: "20px" }} />
         </center>
@@ -201,20 +158,21 @@ export default function Home() {
                   <CardHeader
                     avatar={
                       <Avatar aria-label="recipe" className={classes.avatar}>
-                        M
+                        {d.name.charAt(0).toUpperCase()}
                       </Avatar>
                     }
                     action={
-                      <IconButton
-                        color="secondary"
-                        aria-label="settings"
-                        onClick={() => addToCart(d._id)}
-                      >
-                        <FaCartPlus />
-                      </IconButton>
+                      <Tooltip title="Add to Cart">
+                        <IconButton
+                          style={{ color: "#21314d" }}
+                          aria-label="settings"
+                          onClick={() => addToCart(d._id)}
+                        >
+                          <FaCartPlus />
+                        </IconButton>
+                      </Tooltip>
                     }
                     title={d.name}
-                    // subheader={d.subheader}
                   />
                   <CardMedia
                     className={classes.media}
@@ -222,24 +180,30 @@ export default function Home() {
                     title={d.name}
                   />
                   <CardContent>
-                    <Typography variant="body2" color="textSecondary" paragraph>
-                      Description:
+                    <Typography variant="body2" style={{ color: "#21314d" }}>
+                      <b>Description:</b>
                       {d.highlights.map((element) => element + ",")}
-                      Disease:
+                    </Typography>
+                    <Typography variant="body2" style={{ color: "#21314d" }}>
+                      <b>Disease:</b>
                       {d.diseases.map((element) => element + ",")}
                     </Typography>
                     <CardActions disableSpacing>
                       <Chip
                         color="primary"
                         label={`₹ ${d.originalPrice}`}
-                        style={{ textDecoration: "line-through" }}
+                        style={{
+                          textDecoration: "line-through",
+                          backgroundColor: "#21314d",
+                          color: "#ffffff",
+                        }}
                       />
                       <div className={classes.grow} />
                       <Typography color="secondary" align="left">
-                        {`${d.discountPercent} % Off `}
+                        <b>{`${d.discountPercent} % Off `}</b>
                       </Typography>
                       <div className={classes.grow} />
-                      <Typography color="secondary" align="right">
+                      <Typography align="right" style={{ color: "#32a060" }}>
                         {` ₹ ${d.discountedPrice}`}
                       </Typography>
                     </CardActions>

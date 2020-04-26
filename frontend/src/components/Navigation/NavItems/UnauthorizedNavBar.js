@@ -10,46 +10,54 @@ import {
   AppBar,
   Button,
   Toolbar,
-  IconButton
+  IconButton,
+  Tooltip,
 } from "@material-ui/core/";
 import { fade } from "@material-ui/core/styles";
 import { Provider } from "react-redux";
 import { IoIosLogIn, IoIosLogOut, IoIosPerson } from "react-icons/io";
+import { FaPlusCircle } from "react-icons/fa";
 import {
   FaMicrophone,
   FaSearch,
   FaCloudUploadAlt,
   FaShoppingCart,
-  FaBell
+  FaBell,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-const UnauthorizedNavbar = props => {
+const UnauthorizedNavbar = (props) => {
   const { cartItems, classes } = props;
   return (
     <div>
-      <Button
-        color="primary"
-        className="font"
-        onClick={() => (window.location.href = "/register")}
-      >
-        Register
-      </Button>
-      <IconButton
-        color="primary"
-        onClick={() => (window.location.href = "/login")}
-      >
-        <IoIosLogIn />
-      </IconButton>
-
-      <IconButton
-        color="primary"
-        onClick={() => (window.location.href = "/cart")}
-      >
-        <Badge badgeContent={cartItems.length} color="secondary">
-          <FaShoppingCart />
-        </Badge>
-      </IconButton>
+      <Tooltip title="Register">
+        <IconButton
+          style={{ color: "#32a060" }}
+          color="primary"
+          onClick={() => (window.location.href = "/register")}
+        >
+          <FaPlusCircle />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Login">
+        <IconButton
+          style={{ color: "#32a060" }}
+          color="primary"
+          onClick={() => (window.location.href = "/login")}
+        >
+          <IoIosLogIn />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Shopping Cart">
+        <IconButton
+          style={{ color: "#32a060" }}
+          onClick={() => (window.location.href = "/cart")}
+        >
+          <Badge badgeContent={cartItems.length} color="secondary">
+            <FaShoppingCart />
+          </Badge>
+        </IconButton>
+      </Tooltip>
     </div>
   );
 };

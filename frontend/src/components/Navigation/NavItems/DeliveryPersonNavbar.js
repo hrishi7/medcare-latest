@@ -10,7 +10,8 @@ import {
   AppBar,
   Button,
   Toolbar,
-  IconButton
+  IconButton,
+  Tooltip,
 } from "@material-ui/core/";
 import { fade } from "@material-ui/core/styles";
 import { Provider } from "react-redux";
@@ -20,30 +21,35 @@ import {
   FaSearch,
   FaCloudUploadAlt,
   FaShoppingCart,
-  FaBell
+  FaBell,
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const DeliveryPersonNavbar = (props, classes) => {
   return (
     <div>
-      <IconButton
-        color="primary"
-        onClick={() => (window.location.href = "/notification")}
-      >
-        <FaBell />
-      </IconButton>
-
-      <Button
-        color="primary"
-        className="font"
-        onClick={() => (window.location.href = "/delivery-dashboard")}
-      >
-        Dashboard
-      </Button>
-      <IconButton color="primary" onClick={props.handleLogout}>
-        <IoIosLogOut />
-      </IconButton>
+      <Tooltip title="Notification">
+        <IconButton
+          style={{ color: "#32a060" }}
+          onClick={() => (window.location.href = "/notification")}
+        >
+          <FaBell />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Dashboard">
+        <IconButton
+          style={{ color: "#32a060" }}
+          className="font"
+          onClick={() => (window.location.href = "/delivery-dashboard")}
+        >
+          Dashboard
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Logout">
+        <IconButton style={{ color: "#32a060" }} onClick={props.handleLogout}>
+          <IoIosLogOut />
+        </IconButton>
+      </Tooltip>
     </div>
   );
 };
