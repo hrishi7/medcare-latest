@@ -51,7 +51,6 @@ const UnauthorizedNavbar = (props) => {
       <Tooltip title="Shopping Cart">
         <IconButton
           style={{ color: "#32a060" }}
-          color="primary"
           onClick={() => (window.location.href = "/cart")}
         >
           <Badge badgeContent={cartItems.length} color="secondary">

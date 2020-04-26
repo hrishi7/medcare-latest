@@ -6,7 +6,8 @@ const { ObjectID } = require("mongodb");
 //@route    Get /api/v1/medicines
 //@access   Public
 exports.getMedicines = async (req, res, next) => {
-  let medicines = await Medicine.find({ stock: { $exists: true, $ne: [] } });
+  // let medicines = await Medicine.find({ stock: { $exists: true, $ne: [] } });
+  let medicines = await Medicine.find();
   res.status(200).json(medicines);
 };
 

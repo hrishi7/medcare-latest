@@ -185,28 +185,32 @@ export default function Login(props) {
         </Button>
         <Grid container>
           <Grid item xs={12} md={6}>
-            <Link
-              to="/login"
-              style={{
-                textDecorationColor: "#32a060",
-                fontSize: "14px",
-                color: "#21314d",
-              }}
-            >
-              Forgot password ?
-            </Link>
+            <center>
+              <Link
+                to="/login"
+                style={{
+                  textDecorationColor: "#32a060",
+                  fontSize: "14px",
+                  color: "#21314d",
+                }}
+              >
+                Forgot password ?
+              </Link>
+            </center>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Link
-              to="/register"
-              style={{
-                textDecorationColor: "#32a060",
-                fontSize: "14px",
-                color: "#21314d",
-              }}
-            >
-              Don't have an account?
-            </Link>
+            <center>
+              <Link
+                to="/register"
+                style={{
+                  textDecorationColor: "#32a060",
+                  fontSize: "14px",
+                  color: "#21314d",
+                }}
+              >
+                Don't have an account?
+              </Link>
+            </center>
           </Grid>
         </Grid>
       </Paper>
