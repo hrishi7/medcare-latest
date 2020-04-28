@@ -15,7 +15,9 @@ import UserProfile from "../Customers/UserProfile";
 /**private routes */
 
 import AdminDashboard from "../PrivateComponents/AdminDashboard";
-import DeliveryPersonDashboard from "../PrivateComponents/DeliveryPersonDashboard";
+
+/**delivery person routes */
+import DeliveryPersonDashboard from "../DeliveryPersons/DeliveryPersonDashboard";
 
 /**seller private routes */
 import UpdateProductStock from "../Sellers/UpdateProductStock";

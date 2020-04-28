@@ -222,6 +222,7 @@ export default function CheckoutSteps(props) {
           medicineName: med.item,
           quantity: med.quantity,
           sellerId: med.seller.seller,
+          sellerLocation: med.seller.sellerLocation,
           status: "recieved",
         });
       });
@@ -527,8 +528,13 @@ export default function CheckoutSteps(props) {
             crd.latitude,
             crd.longitude
           ) / 1000;
+        let sellerLocation = {
+          latitude: stock.locLatitude,
+          longitude: stock.locLongitude,
+        };
         stockObj.seller = stock.seller;
         stockObj.distance = distance;
+        stockObj.sellerLocation = sellerLocation;
         stockistList.push(stockObj);
       });
       let nearestSeller = getNearestSeller(stockistList);

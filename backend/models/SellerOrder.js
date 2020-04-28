@@ -12,6 +12,10 @@ const SellerOrderSchema = new mongoose.Schema({
     type: String,
     enum: ["recieved", "packed", "handedover"],
   },
+  sellerLocation: {
+    latitude: Number,
+    longitude: Number,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { ObjectID } = require("mongodb");
 
 //@desc     Register user
 //@route    Post /api/v1/auth/register
@@ -8,16 +9,28 @@ const jwt = require("jsonwebtoken");
 exports.register = async (req, res, next) => {
   let { name, email, mobile, password, role } = req.body;
 
-  let salt = bcrypt.genSaltSync(10);
-  password = bcrypt.hashSync(password, salt);
-  //Create user
-  await User.create({
+  let newUser = {
     name,
     email,
     mobile,
-    password,
-    role
-  });
+    role,
+  };
+
+  /**for deliveryPerson case add status and currentLocation */
+  if (role == "deliveryperson") {
+    newUser.status = "offline";
+    let currentLocation = {
+      locLatitude: null,
+      locLongitude: null,
+    };
+    newUser.currentLocation = currentLocation;
+  }
+
+  let salt = bcrypt.genSaltSync(10);
+  password = bcrypt.hashSync(password, salt);
+  newUser.password = password;
+  //Create user
+  await User.create(newUser);
   res.status(201).json({ message: "Registration Successfull" });
 };
 
@@ -31,14 +44,21 @@ exports.login = async (req, res, next) => {
   //check if password matches
   if (!user || !bcrypt.compareSync(password, user.password)) {
     res.status(400).json({
-      message: "Invalid Password"
+      message: "Invalid Password",
     });
   } else {
+    if (user.role == "deliveryperson") {
+      await User.findOneAndUpdate(
+        { _id: ObjectID(user._id) },
+        { $set: { status: "online" } },
+        { new: true }
+      );
+    }
     const payload = {
       id: user._id,
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
     }; // Create JWT Payload
     // Sign Token
     jwt.sign(
@@ -48,7 +68,7 @@ exports.login = async (req, res, next) => {
       (err, token) => {
         res.status(200).json({
           success: true,
-          token: "Bearer " + token
+          token: "Bearer " + token,
         });
       }
     );
@@ -62,6 +82,6 @@ exports.login = async (req, res, next) => {
 exports.logout = async (req, res, next) => {
   res.status(200).json({
     success: true,
-    data: {}
+    data: {},
   });
 };

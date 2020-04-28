@@ -15,6 +15,17 @@ exports.checkAndUpdateOrderStatus = async () => {
           runValidators: true,
         }
       );
+      /**search for all online Delivery persons
+       * then compare distance between delivery currentLocation and deliveryLocation
+       * select lowest distance and update Order with that delivery person _id and
+       * then send socket.io notification to ManageOrder of deliveryperson
+       * then search in the frontend
+       * 1. search and restructure every order item with seller location name and medicine detail and delivery location
+       */
+      let deliveryPersons = await User.find({
+        status: "online",
+        role: "deliveryperson",
+      });
       updateOrderStatus.push(updatePromise);
     }
   });

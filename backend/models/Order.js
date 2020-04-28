@@ -30,6 +30,10 @@ const OrderSchema = new mongoose.Schema({
       "Delivered",
     ],
   },
+  deliveryPerson: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+  },
   createdAt: {
     type: Date,
     default: Date.now,
